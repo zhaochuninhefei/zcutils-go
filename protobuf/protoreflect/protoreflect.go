@@ -2,9 +2,10 @@ package protoreflect
 
 import (
 	"fmt"
-	"google.golang.org/protobuf/proto"
 	"reflect"
 	"strings"
+
+	"google.golang.org/protobuf/proto"
 )
 
 // FieldInfo 字段情报
@@ -29,6 +30,7 @@ type FieldInfo struct {
 	ExplicitDef bool
 }
 
+// String 重写String方法
 func (fd *FieldInfo) String() string {
 	if fd == nil {
 		return "nil"
@@ -42,7 +44,8 @@ func (fd *FieldInfo) String() string {
 		fd.ExplicitDef)
 }
 
-func getFields(msg proto.Message) ([]*FieldInfo, error) {
+// GetFields 获取目标proto消息的字段信息
+func GetFields(msg proto.Message) ([]*FieldInfo, error) {
 	// 对msg进行反射获取reflect.Value
 	vMsg := reflect.ValueOf(msg)
 	// 判断reflect.Value的类型，这里必须是指针

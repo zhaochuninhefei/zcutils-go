@@ -15,7 +15,7 @@ func Test_getFields_success(t *testing.T) {
 	}
 	pb := proto.Message(owner1)
 
-	got, err := getFields(pb)
+	got, err := GetFields(pb)
 	if err != nil {
 		fmt.Println(err)
 	}
