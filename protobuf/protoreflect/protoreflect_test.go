@@ -144,14 +144,12 @@ func TestGetFieldsByProtoReflect(t *testing.T) {
 	}
 	pb := proto.Message(asset1)
 
-	got, err := GetFieldsByProtoReflect(pb)
-	if err != nil {
-		fmt.Println(err)
-	}
-	if got != nil {
-		for _, fd := range got {
-			fmt.Printf("fd: %s\n", fd)
-		}
+	m := pb.ProtoReflect()
+	fds := m.Descriptor().Fields()
+	for k := 0; k < fds.Len(); k++ {
+		fd := fds.Get(k)
+		fv := m.Get(fd)
+		fmt.Printf("fieldName: %s, fieldValue: %s, fieldType: %s \n", fd.Name(), fv, fd.Kind())
 	}
 	fmt.Println("--- TestGetFieldsByProtoReflect end ---")
 }
