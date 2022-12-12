@@ -2,10 +2,11 @@ package protoreflect
 
 import (
 	"fmt"
+	"testing"
+
 	"gitee.com/zhaochuninhefei/zcutils-go/protobuf/myproto-go/asset"
 	"gitee.com/zhaochuninhefei/zcutils-go/protobuf/myproto-go/owner"
 	"google.golang.org/protobuf/proto"
-	"testing"
 )
 
 func Benchmark(b *testing.B) {
