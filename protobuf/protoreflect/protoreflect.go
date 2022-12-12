@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"strings"
 
+	protogh "github.com/golang/protobuf/proto"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -101,7 +102,115 @@ func GetFields(msg proto.Message) ([]*FieldInfo, error) {
 				}
 			}
 		} else {
-			fieldInfo.ExplicitDef = false
+			tagOneof := f.Tag.Get("protobuf_oneof")
+			if tagOneof != "" {
+				fieldInfo.ExplicitDef = true
+				fieldInfo.ProtoName = tagOneof
+			} else {
+				fieldInfo.ExplicitDef = false
+			}
+		}
+		fieldInfos = append(fieldInfos, fieldInfo)
+	}
+	return fieldInfos, nil
+}
+
+func GetFieldsByProperties(msg protogh.Message) ([]*FieldInfo, error) {
+	// 对msg进行反射获取reflect.Value
+	vMsg := reflect.ValueOf(msg)
+	// 判断reflect.Value的类型，这里必须是指针
+	if vMsg.Kind() != reflect.Ptr {
+		return nil, fmt.Errorf("err01 : msg is not a Pointer, but a %s", vMsg.Kind())
+	}
+	// 非空检查
+	if vMsg.IsNil() {
+		return nil, fmt.Errorf("err02 : msg is nil")
+	}
+	// 获取指针指向的数据结构
+	vElem := vMsg.Elem()
+	// 检查指针指向的数据结构的类型，必须是一个Struct结构体
+	if vElem.Kind() != reflect.Struct {
+		return nil, fmt.Errorf("err03 : msg's elem is not a Struct, but a %s", vElem.Kind())
+	}
+	// 获取msg消息对应的类型
+	mElem := vElem.Type()
+	// 获取该类型的字段个数
+	fdNum := mElem.NumField()
+	// 检查字段数量
+	if fdNum == 0 {
+		return nil, fmt.Errorf("err04 : msg has no fields")
+	}
+
+	fieldInfos := make([]*FieldInfo, 0, fdNum)
+
+	//goland:noinspection GoDeprecation
+	protoProps := protogh.GetProperties(mElem)
+	for _, prop := range protoProps.Prop {
+		if strings.HasPrefix(prop.Name, "XXX_") {
+			continue
+		}
+		fieldValue := vElem.FieldByName(prop.Name)
+		fieldTypeStruct, ok := vElem.Type().FieldByName(prop.Name)
+		if !ok {
+			return nil, fmt.Errorf("programming error: proto does not have field advertised by proto package : %s", prop.Name)
+		}
+		fieldType := fieldTypeStruct.Type
+		fieldInfo := &FieldInfo{
+			FieldName:   prop.Name,
+			FieldType:   fieldType,
+			FiledValue:  fieldValue,
+			ProtoName:   prop.OrigName,
+			JsonName:    prop.JSONName,
+			ExplicitDef: true,
+		}
+		fieldInfos = append(fieldInfos, fieldInfo)
+	}
+	return fieldInfos, nil
+}
+
+func GetFieldsByProtoReflect(msg proto.Message) ([]*FieldInfo, error) {
+	// 对msg进行反射获取reflect.Value
+	vMsg := reflect.ValueOf(msg)
+	// 判断reflect.Value的类型，这里必须是指针
+	if vMsg.Kind() != reflect.Ptr {
+		return nil, fmt.Errorf("err01 : msg is not a Pointer, but a %s", vMsg.Kind())
+	}
+	// 非空检查
+	if vMsg.IsNil() {
+		return nil, fmt.Errorf("err02 : msg is nil")
+	}
+	// 获取指针指向的数据结构
+	vElem := vMsg.Elem()
+	// 检查指针指向的数据结构的类型，必须是一个Struct结构体
+	if vElem.Kind() != reflect.Struct {
+		return nil, fmt.Errorf("err03 : msg's elem is not a Struct, but a %s", vElem.Kind())
+	}
+	// 获取msg消息对应的类型
+	mElem := vElem.Type()
+	// 获取该类型的字段个数
+	fdNum := mElem.NumField()
+	fmt.Printf("fdNum: %d\n", fdNum)
+	// 检查字段数量
+	if fdNum == 0 {
+		return nil, fmt.Errorf("err04 : msg has no fields")
+	}
+
+	fieldInfos := make([]*FieldInfo, 0, fdNum)
+
+	m := msg.ProtoReflect()
+	fds := m.Descriptor().Fields()
+	fmt.Printf("fds.Len(): %d\n", fds.Len())
+	for k := 0; k < fds.Len(); k++ {
+		fd := fds.Get(k)
+		f := mElem.Field(k + 2)
+		v := vElem.Field(k + 2)
+		fieldInfo := &FieldInfo{
+			FieldName:   f.Name,
+			FieldType:   f.Type,
+			FiledValue:  v,
+			ProtoName:   fd.TextName(),
+			JsonName:    fd.JSONName(),
+			ExplicitDef: true,
 		}
 		fieldInfos = append(fieldInfos, fieldInfo)
 	}
