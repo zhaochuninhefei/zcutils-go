@@ -10,28 +10,6 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func BenchmarkGetFields(b *testing.B) {
-	asset1 := &asset.BasicAsset{
-		AssetId:    1,
-		AssetName:  "测试资产1",
-		AssetPrice: 108,
-		AssetOwner: &owner.Owner{
-			OwnerId:   0,
-			OwnerName: "张三",
-		},
-		AssetNum:    &asset.BasicAsset_AssetNumInt{AssetNumInt: 123},
-		AssetStatus: asset.BasicAsset_CHANGED,
-	}
-	pb := proto.Message(asset1)
-	for i := 0; i < b.N; i++ {
-		_, err := GetFields(pb)
-		if err != nil {
-			fmt.Println(err)
-			break
-		}
-	}
-}
-
 func BenchmarkGetFieldsByProperties(b *testing.B) {
 	asset1 := &asset.BasicAsset{
 		AssetId:    1,
@@ -47,6 +25,28 @@ func BenchmarkGetFieldsByProperties(b *testing.B) {
 	pb := protogh.Message(asset1)
 	for i := 0; i < b.N; i++ {
 		_, err := GetFieldsByProperties(pb)
+		if err != nil {
+			fmt.Println(err)
+			break
+		}
+	}
+}
+
+func BenchmarkGetFields(b *testing.B) {
+	asset1 := &asset.BasicAsset{
+		AssetId:    1,
+		AssetName:  "测试资产1",
+		AssetPrice: 108,
+		AssetOwner: &owner.Owner{
+			OwnerId:   0,
+			OwnerName: "张三",
+		},
+		AssetNum:    &asset.BasicAsset_AssetNumInt{AssetNumInt: 123},
+		AssetStatus: asset.BasicAsset_CHANGED,
+	}
+	pb := proto.Message(asset1)
+	for i := 0; i < b.N; i++ {
+		_, err := GetFields(pb)
 		if err != nil {
 			fmt.Println(err)
 			break
