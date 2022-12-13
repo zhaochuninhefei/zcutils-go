@@ -1,12 +1,35 @@
 package protoreflect
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
 
 	protogh "github.com/golang/protobuf/proto"
 	"google.golang.org/protobuf/proto"
+)
+
+// 自动生成字段名常量定义
+//goland:noinspection GoSnakeCaseUsage,GoUnusedConst
+const (
+	// protoc-gen-go v1.20之前生成的"XXX_"前缀字段
+	// 对应`github.com/golang/protobuf`为版本`1.4.2`之前
+
+	GONAME_XXX_PREFIX         = "XXX_"
+	GONAME_X_NOUNKEYEDLITERAL = "XXX_NoUnkeyedLiteral"
+	GONAME_X_UNRECOGNIZED     = "XXX_unrecognized"
+	GONAME_X_SIZECACHE        = "XXX_sizecache"
+
+	// protoc-gen-go v1.20开始生成的特殊字段
+	// 对应`github.com/golang/protobuf`为版本`1.4.2`以后
+	// 对应`google.golang.org/protobuf`所有版本(`v1.20.0`为目前最早的版本)
+
+	GONAME_N_STATE           = "state"
+	GONAME_N_SIZECACHE       = "sizeCache"
+	GONAME_N_UNKNOWNFIELDS   = "unknownFields"
+	GONAME_N_EXTENSIONFIELDS = "extensionFields"
+	GONAME_N_WEAKFIELDS      = "weakFields"
 )
 
 // FieldInfo 字段情报
@@ -115,6 +138,8 @@ func GetFields(msg proto.Message) ([]*FieldInfo, error) {
 	return fieldInfos, nil
 }
 
+// GetFieldsByProperties 根据StructProperties获取proto消息字段信息
+//  注意，该函数使用了`github.com/golang/protobuf/proto`的弃用函数`GetProperties`
 func GetFieldsByProperties(msg protogh.Message) ([]*FieldInfo, error) {
 	// 对msg进行反射获取reflect.Value
 	vMsg := reflect.ValueOf(msg)
@@ -166,4 +191,22 @@ func GetFieldsByProperties(msg protogh.Message) ([]*FieldInfo, error) {
 		fieldInfos = append(fieldInfos, fieldInfo)
 	}
 	return fieldInfos, nil
+}
+
+// IsGeneratedAutoFields 判断字段是否是proto-gen-go自动生成的特殊字段
+func IsGeneratedAutoFields(fieldName string) (bool, error) {
+	if fieldName == "" {
+		return false, errors.New("fieldName is empty")
+	}
+	if strings.HasPrefix(fieldName, GONAME_XXX_PREFIX) {
+		return true, nil
+	}
+	if fieldName == GONAME_N_STATE ||
+		fieldName == GONAME_N_SIZECACHE ||
+		fieldName == GONAME_N_UNKNOWNFIELDS ||
+		fieldName == GONAME_N_EXTENSIONFIELDS ||
+		fieldName == GONAME_N_WEAKFIELDS {
+		return true, nil
+	}
+	return false, nil
 }

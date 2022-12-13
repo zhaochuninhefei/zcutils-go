@@ -69,7 +69,8 @@ func TestGetFieldsOwnerSuccess(t *testing.T) {
 	}
 	if got != nil {
 		for _, fd := range got {
-			fmt.Printf("fd: %s\n", fd)
+			isG, _ := IsGeneratedAutoFields(fd.FieldName)
+			fmt.Printf("fd: %s , 是否自动生成: %v\n", fd, isG)
 		}
 	}
 	fmt.Println("--- TestGetFieldsOwnerSuccess end ---")
