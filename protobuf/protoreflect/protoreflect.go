@@ -69,6 +69,9 @@ func (fd *FieldInfo) String() string {
 }
 
 // GetFields 获取目标proto消息的字段信息
+//  @param msg protobuf消息
+//  @return []*FieldInfo 字段信息列表
+//  @return error
 func GetFields(msg proto.Message) ([]*FieldInfo, error) {
 	// 对msg进行反射获取reflect.Value
 	vMsg := reflect.ValueOf(msg)
@@ -140,6 +143,9 @@ func GetFields(msg proto.Message) ([]*FieldInfo, error) {
 
 // GetFieldsByProperties 根据StructProperties获取proto消息字段信息
 //  注意，该函数使用了`github.com/golang/protobuf/proto`的弃用函数`GetProperties`
+//  @param msg protobuf消息
+//  @return []*FieldInfo 字段信息列表
+//  @return error
 func GetFieldsByProperties(msg protogh.Message) ([]*FieldInfo, error) {
 	// 对msg进行反射获取reflect.Value
 	vMsg := reflect.ValueOf(msg)
@@ -194,6 +200,9 @@ func GetFieldsByProperties(msg protogh.Message) ([]*FieldInfo, error) {
 }
 
 // IsGeneratedAutoFields 判断字段是否是proto-gen-go自动生成的特殊字段
+//  @param fieldName 字段名
+//  @return bool 是否是proto-gen-go自动生成的特殊字段
+//  @return error
 func IsGeneratedAutoFields(fieldName string) (bool, error) {
 	if fieldName == "" {
 		return false, errors.New("fieldName is empty")
