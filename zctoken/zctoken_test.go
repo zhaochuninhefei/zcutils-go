@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"gitee.com/zhaochuninhefei/gmgo/sm2"
 	"gitee.com/zhaochuninhefei/gmgo/x509"
-	"gitee.com/zhaochuninhefei/zcutils-go/zctime"
 	"testing"
-	"time"
 )
 
 func TestCreateSM2Key(t *testing.T) {
@@ -43,16 +41,11 @@ func TestCreateSM2Key(t *testing.T) {
 	fmt.Println("测试sm2私钥与公钥文件读写成功")
 }
 
-func TestTime(t *testing.T) {
-	now := time.Now()
-
-	timeStr := now.Format(zctime.TIME_FORMAT_SIMPLE)
-	fmt.Println(timeStr)
-
-	timeObj, err := time.Parse(zctime.TIME_FORMAT_SIMPLE, timeStr)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Println(timeObj)
-}
+//func TestBuildTokenWithGM(t *testing.T) {
+//	// 从pem文件读取私钥
+//	privKey, err := x509.ReadPrivateKeyFromPemFile("testdata/pri_key.pem", nil)
+//	if err != nil {
+//		t.Fatal(err)
+//	}
+//
+//}
