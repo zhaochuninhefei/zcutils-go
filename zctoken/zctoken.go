@@ -20,8 +20,11 @@ import (
 	"time"
 )
 
+// Alg 凭证算法类型，目前支持:"SM2-SM3","ECDSA-SHA256","ED25519-SHA256"。
+//  算法前半部是签名算法，后半部是散列算法。
 type Alg string
 
+// zctoken支持的凭证算法列表、默认算法以及默认凭证类型(目前只有JWT)
 //goland:noinspection GoSnakeCaseUsage
 const (
 	ALG_SM2_SM3        Alg = "SM2-SM3"
@@ -71,6 +74,7 @@ func CreateTokenHeaderDefault() *TokenHeader {
 
 // CreateStdPayloads 创建标准凭证有效负载
 //  其中，过期时间使用 `当前时间 + expSeconds过期时间秒数` ，生效时间与签发时间均采用当前时间
+//
 //  @param iss 签发者
 //  @param sub 主题
 //  @param aud 受众
@@ -99,15 +103,14 @@ func CreateStdPayloads(iss string, sub string, aud string, jti string, expSecond
 }
 
 // PrepareStdTokenStruct 准备标准凭证结构体
-//  @param iss
-//  @param sub
-//  @param aud
-//  @param jti
-//  @param expSeconds
-//  @param alg
-//  @param priKeyPem
-//  @param pubKeyPem
-//  @return *Token
+//
+//  @param iss 签发者
+//  @param sub 主题
+//  @param aud 受众
+//  @param jti 编号
+//  @param expSeconds 过期时间秒数
+//  @param alg 凭证算法
+//  @return *Token 凭证结构体(指针)
 //  @return error
 func PrepareStdTokenStruct(
 	iss string,
@@ -127,6 +130,11 @@ func PrepareStdTokenStruct(
 	return token, nil
 }
 
+// BuildToken 创建凭证
+//  @param token 凭证结构体
+//  @param exp 凭证过期时间，如果不打算重置token.Payloads中的过期时间，则这里传入time零值(`time.Time{}`)即可。
+//  @param priKeyPem 私钥pem
+//  @return error
 func BuildToken(token *Token, exp time.Time, priKeyPem []byte) error {
 	if token == nil {
 		return errors.New("[-9]token不可传nil")
@@ -224,7 +232,7 @@ func BuildToken(token *Token, exp time.Time, priKeyPem []byte) error {
 
 // BuildTokenWithGM 使用SM2-SM3算法创建凭证
 //  @param payloads 凭证有效负载
-//  @param exp 凭证过期时间
+//  @param exp 凭证过期时间，如果不打算重置payloads中的过期时间，则这里传入time零值(`time.Time{}`)即可。
 //  @param priKey 签名私钥(sm2)
 //  @return string 凭证字符串
 //  @return error
@@ -273,6 +281,11 @@ func BuildTokenWithGM(payloads map[string]string, exp time.Time, priKey *sm2.Pri
 	return token, nil
 }
 
+// CheckToken 校验凭证
+//  @param tokenStr 凭证字符串
+//  @param pubKeyPem 验签公钥pem
+//  @return *Token 凭证结构体(指针)
+//  @return error
 func CheckToken(tokenStr string, pubKeyPem []byte) (*Token, error) {
 	token := &Token{
 		TokenStr: tokenStr,
