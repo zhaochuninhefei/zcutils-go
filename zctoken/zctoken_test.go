@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gitee.com/zhaochuninhefei/gmgo/sm2"
 	"gitee.com/zhaochuninhefei/gmgo/x509"
+	"gitee.com/zhaochuninhefei/zcutils-go/zctime"
 	"testing"
 	"time"
 )
@@ -45,10 +46,10 @@ func TestCreateSM2Key(t *testing.T) {
 func TestTime(t *testing.T) {
 	now := time.Now()
 
-	timeStr := now.Format("20060102150405")
+	timeStr := now.Format(zctime.TIME_FORMAT_SIMPLE)
 	fmt.Println(timeStr)
 
-	timeObj, err := time.Parse("20060102150405", timeStr)
+	timeObj, err := time.Parse(zctime.TIME_FORMAT_SIMPLE, timeStr)
 	if err != nil {
 		fmt.Println(err)
 		return

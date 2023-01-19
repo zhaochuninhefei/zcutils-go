@@ -10,7 +10,9 @@ import (
 	"fmt"
 	"gitee.com/zhaochuninhefei/gmgo/sm2"
 	"gitee.com/zhaochuninhefei/gmgo/sm3"
+	"gitee.com/zhaochuninhefei/zcutils-go/zctime"
 	"strings"
+	"time"
 )
 
 //goland:noinspection GoSnakeCaseUsage
@@ -48,23 +50,36 @@ func CreateTokenHeaderDefault() *TokenHeader {
 
 // BuildTokenWithGM 使用SM2-with-SM3算法创建凭证
 //  @param payloads 凭证有效负载
+//  @param exp 凭证过期时间
 //  @param priKey 签名私钥(sm2)
 //  @return string 凭证字符串
 //  @return error
-func BuildTokenWithGM(payloads map[string]string, priKey *sm2.PrivateKey) (string, error) {
+func BuildTokenWithGM(payloads map[string]string, exp time.Time, priKey *sm2.PrivateKey) (string, error) {
+	if payloads == nil {
+		return "", errors.New("[-1]凭证有效负载不可为nil")
+	}
+	if priKey == nil {
+		return "", errors.New("[-1]签名私钥(sm2)不可为nil")
+	}
+
 	// 创建默认token头部
 	tokenHeader := CreateTokenHeaderDefault()
 	// 将token头转为json
 	jsonTokenHeader, err := json.Marshal(&tokenHeader)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("[-9]token头json序列化失败: %s", err)
 	}
 	// 对token头做base64编码
 	headerBase64 := base64.URLEncoding.EncodeToString(jsonTokenHeader)
+
+	// 设置凭证过期时间
+	if !exp.IsZero() {
+		payloads["exp"] = exp.Format(zctime.TIME_FORMAT_SIMPLE)
+	}
 	// 将token的有效负载转为json
 	jsonPayloads, err := json.Marshal(payloads)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("[-9]token有效负载json序列化失败: %s", err)
 	}
 	// 对token的有效负载做base64编码
 	payloadsBase64 := base64.URLEncoding.EncodeToString(jsonPayloads)
@@ -75,7 +90,7 @@ func BuildTokenWithGM(payloads map[string]string, priKey *sm2.PrivateKey) (strin
 	// 对摘要做sm2签名
 	sign, err := priKey.Sign(rand.Reader, digest, nil)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("[-9]token签名失败: %s", err)
 	}
 	// 将签名转为hex字符串
 	signStr := hex.EncodeToString(sign)
@@ -87,7 +102,7 @@ func BuildTokenWithGM(payloads map[string]string, priKey *sm2.PrivateKey) (strin
 func CheckTokenWithGM(token string, pubKey *sm2.PublicKey) (map[string]string, error) {
 	tmpArr := strings.Split(token, ".")
 	if len(tmpArr) != 3 {
-		return nil, errors.New("-5:token格式错误")
+		return nil, errors.New("[-5]token格式错误")
 	}
 	headerBase64 := tmpArr[0]
 	payloadsBase64 := tmpArr[1]
@@ -109,10 +124,10 @@ func CheckTokenWithGM(token string, pubKey *sm2.PublicKey) (map[string]string, e
 	digest := sm3.Sm3Sum([]byte(content))
 	sign, err := hex.DecodeString(signStr)
 	if err != nil {
-		return nil, errors.New("-5:token签名验证失败")
+		return nil, fmt.Errorf("[-5]token签名hex解码失败: %s", err)
 	}
 	if !pubKey.Verify(digest, sign) {
-		return nil, errors.New("-5:token签名验证失败")
+		return nil, fmt.Errorf("[-5]token验签失败: %s", err)
 	}
 
 	// 解析有效负载
@@ -126,10 +141,17 @@ func CheckTokenWithGM(token string, pubKey *sm2.PublicKey) (map[string]string, e
 		return nil, fmt.Errorf("[-5]token有效负载json反序列化失败: %s", err)
 	}
 	// 凭证过期检查
-	exp := payloads["exp"]
-	if exp != "" {
-
+	expVal := payloads["exp"]
+	if expVal != "" {
+		now := time.Now()
+		exp, err := time.Parse(zctime.TIME_FORMAT_SIMPLE, expVal)
+		if err != nil {
+			return nil, fmt.Errorf("[-5]token过期时间反序列化失败: %s", err)
+		}
+		if now.After(exp) {
+			return nil, fmt.Errorf("[-1]token过期,过期时间: %s, 检查时间: %s", expVal, now.Format(zctime.TIME_FORMAT_SIMPLE))
+		}
 	}
 
-	return nil, nil
+	return payloads, nil
 }
