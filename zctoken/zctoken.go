@@ -48,6 +48,27 @@ func CreateTokenHeaderDefault() *TokenHeader {
 	return CreateTokenHeader(ALG_DEFAULT, TYP_DEFAULT)
 }
 
+func CreateStdPayloads(iss string, sub string, aud string, jti string, expSeconds uint64) map[string]string {
+	now := time.Now()
+	strNow := now.Format(zctime.TIME_FORMAT_SIMPLE)
+	payloads := make(map[string]string)
+	// 签发者
+	payloads["iss"] = iss
+	// 主题
+	payloads["sub"] = sub
+	// 受众
+	payloads["aud"] = aud
+	// 编号
+	payloads["jti"] = jti
+	// 过期时间
+	payloads["exp"] = now.Add(time.Second * time.Duration(expSeconds)).Format(zctime.TIME_FORMAT_SIMPLE)
+	// 生效时间
+	payloads["nbf"] = strNow
+	// 签发时间
+	payloads["iat"] = strNow
+	return payloads
+}
+
 // BuildTokenWithGM 使用SM2-with-SM3算法创建凭证
 //  @param payloads 凭证有效负载
 //  @param exp 凭证过期时间

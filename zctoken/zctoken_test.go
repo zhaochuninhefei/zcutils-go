@@ -56,8 +56,9 @@ func TestBuildTokenWithGM(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	payloads := make(map[string]string)
-	token, err := BuildTokenWithGM(payloads, time.Now().Add(time.Second*5), privKey.(*sm2.PrivateKey))
+	payloads := CreateStdPayloads("zhaochun", "test", "anyone", "No001", 5)
+	// 注意这里exp传入的是 time.Time{} ,即零值，不重置payloads里的exp
+	token, err := BuildTokenWithGM(payloads, time.Time{}, privKey.(*sm2.PrivateKey))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,7 +86,8 @@ func TestBuildTokenWithGMTimeout(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	payloads := make(map[string]string)
+	payloads := CreateStdPayloads("zhaochun", "test", "anyone", "No002", 5)
+	// 注意这里重置了过期时间
 	token, err := BuildTokenWithGM(payloads, time.Now().Add(time.Second*1), privKey.(*sm2.PrivateKey))
 	if err != nil {
 		t.Fatal(err)
