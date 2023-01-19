@@ -48,6 +48,14 @@ func CreateTokenHeaderDefault() *TokenHeader {
 	return CreateTokenHeader(ALG_DEFAULT, TYP_DEFAULT)
 }
 
+// CreateStdPayloads 创建标准凭证有效负载
+//  其中，过期时间使用 `当前时间 + expSeconds过期时间秒数` ，生效时间与签发时间均采用当前时间
+//  @param iss 签发者
+//  @param sub 主题
+//  @param aud 受众
+//  @param jti 编号
+//  @param expSeconds 过期时间秒数
+//  @return map[string]string 凭证有效负载
 func CreateStdPayloads(iss string, sub string, aud string, jti string, expSeconds uint64) map[string]string {
 	now := time.Now()
 	strNow := now.Format(zctime.TIME_FORMAT_SIMPLE)
