@@ -6,6 +6,7 @@ import (
 	"gitee.com/zhaochuninhefei/gmgo/sm2"
 	"gitee.com/zhaochuninhefei/gmgo/x509"
 	"testing"
+	"time"
 )
 
 func TestCreateSM2Key(t *testing.T) {
@@ -39,4 +40,18 @@ func TestCreateSM2Key(t *testing.T) {
 	}
 	fmt.Printf("读取到sm2公钥 : %v\n", pubKey)
 	fmt.Println("测试sm2私钥与公钥文件读写成功")
+}
+
+func TestTime(t *testing.T) {
+	now := time.Now()
+
+	timeStr := now.Format("20060102150405")
+	fmt.Println(timeStr)
+
+	timeObj, err := time.Parse("20060102150405", timeStr)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(timeObj)
 }
