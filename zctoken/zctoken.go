@@ -99,6 +99,11 @@ func BuildTokenWithGM(payloads map[string]string, exp time.Time, priKey *sm2.Pri
 	return token, nil
 }
 
+// CheckTokenWithGM 使用SM2-with-SM3算法校验凭证
+//  @param token 凭证字符串
+//  @param pubKey 验签公钥(sm2)
+//  @return map[string]string 凭证有效负载
+//  @return error
 func CheckTokenWithGM(token string, pubKey *sm2.PublicKey) (map[string]string, error) {
 	tmpArr := strings.Split(token, ".")
 	if len(tmpArr) != 3 {
