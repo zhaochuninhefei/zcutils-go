@@ -2,10 +2,12 @@ package zctoken
 
 import (
 	"crypto/rand"
+	"encoding/json"
 	"fmt"
 	"gitee.com/zhaochuninhefei/gmgo/sm2"
 	"gitee.com/zhaochuninhefei/gmgo/x509"
 	"testing"
+	"time"
 )
 
 func TestCreateSM2Key(t *testing.T) {
@@ -41,11 +43,31 @@ func TestCreateSM2Key(t *testing.T) {
 	fmt.Println("测试sm2私钥与公钥文件读写成功")
 }
 
-//func TestBuildTokenWithGM(t *testing.T) {
-//	// 从pem文件读取私钥
-//	privKey, err := x509.ReadPrivateKeyFromPemFile("testdata/pri_key.pem", nil)
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//
-//}
+func TestBuildTokenWithGM(t *testing.T) {
+	// 从pem文件读取私钥
+	privKey, err := x509.ReadPrivateKeyFromPemFile("testdata/pri_key.pem", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 从pem文件读取公钥
+	pubKey, err := x509.ReadPublicKeyFromPemFile("testdata/pub_key.pem")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	payloads := make(map[string]string)
+	token, err := BuildTokenWithGM(payloads, time.Now().Add(time.Second*5), privKey.(*sm2.PrivateKey))
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("token: %s\n", token)
+
+	time.Sleep(time.Second * 3)
+
+	payloadsAfterCheck, err := CheckTokenWithGM(token, pubKey.(*sm2.PublicKey))
+	if err != nil {
+		t.Fatal(err)
+	}
+	jsonPayloads, _ := json.Marshal(payloadsAfterCheck)
+	fmt.Printf("jsonPayloads: %s\n", jsonPayloads)
+}

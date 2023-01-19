@@ -149,7 +149,7 @@ func CheckTokenWithGM(token string, pubKey *sm2.PublicKey) (map[string]string, e
 	expVal := payloads["exp"]
 	if expVal != "" {
 		now := time.Now()
-		exp, err := time.Parse(zctime.TIME_FORMAT_SIMPLE, expVal)
+		exp, err := time.ParseInLocation(zctime.TIME_FORMAT_SIMPLE, expVal, time.Local)
 		if err != nil {
 			return nil, fmt.Errorf("[-5]token过期时间反序列化失败: %s", err)
 		}
