@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"gitee.com/zhaochuninhefei/gmgo/sm2"
 	"gitee.com/zhaochuninhefei/gmgo/x509"
+	"gitee.com/zhaochuninhefei/zcutils-go/zcrandom"
 	"io/ioutil"
 	"reflect"
 	"strings"
@@ -309,6 +310,78 @@ func TestBuildTokenWithEd25519(t *testing.T) {
 	fmt.Printf("token struct : %s\n", string(jsonToken))
 
 	token1, err := CheckTokenWithECC(token.TokenStr, pubKeyPem)
+	if err != nil {
+		t.Fatal(err)
+	}
+	jsonToken1, err := json.Marshal(token1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("token1 struct : %s\n", string(jsonToken1))
+
+	if reflect.DeepEqual(token, token1) {
+		fmt.Println("OK")
+	} else {
+		t.Fatal("NG")
+	}
+}
+
+func TestBuildTokenWithHMACSM3(t *testing.T) {
+	keyBytes, _ := zcrandom.GenerateRandomBytes(64)
+
+	token, err := PrepareSplTokenStruct("anyone", 5, ALG_HMAC_SM3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = BuildTokenWithHMAC(token, time.Time{}, keyBytes)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("token: %s\n", token.TokenStr)
+
+	jsonToken, err := json.Marshal(token)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("token struct : %s\n", string(jsonToken))
+
+	token1, err := CheckTokenWithHMAC(token.TokenStr, keyBytes)
+	if err != nil {
+		t.Fatal(err)
+	}
+	jsonToken1, err := json.Marshal(token1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("token1 struct : %s\n", string(jsonToken1))
+
+	if reflect.DeepEqual(token, token1) {
+		fmt.Println("OK")
+	} else {
+		t.Fatal("NG")
+	}
+}
+
+func TestBuildTokenWithHMACSHA256(t *testing.T) {
+	keyBytes, _ := zcrandom.GenerateRandomBytes(64)
+
+	token, err := PrepareSplTokenStruct("anyone", 5, ALG_HMAC_SHA256)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = BuildTokenWithHMAC(token, time.Time{}, keyBytes)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("token: %s\n", token.TokenStr)
+
+	jsonToken, err := json.Marshal(token)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("token struct : %s\n", string(jsonToken))
+
+	token1, err := CheckTokenWithHMAC(token.TokenStr, keyBytes)
 	if err != nil {
 		t.Fatal(err)
 	}

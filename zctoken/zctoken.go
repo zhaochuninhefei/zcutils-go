@@ -5,6 +5,7 @@ import (
 	"crypto"
 	"crypto/ecdsa"
 	"crypto/ed25519"
+	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
@@ -16,6 +17,7 @@ import (
 	"gitee.com/zhaochuninhefei/gmgo/sm3"
 	"gitee.com/zhaochuninhefei/gmgo/x509"
 	"gitee.com/zhaochuninhefei/zcutils-go/zctime"
+	"hash"
 	"strings"
 	"time"
 )
@@ -38,7 +40,21 @@ const (
 	ALG_DEFAULT = ALG_SM2_SM3
 	// TYP_DEFAULT 默认凭证类型
 	TYP_DEFAULT = "JWT"
+
+	// HMAC_KEY_DEFAULT_HEX HMAC默认密钥，长度64的字节数组转为hex字符串，使用`zcrandom.GenerateRandomBytes`生成。
+	HMAC_KEY_DEFAULT_HEX = "1fa90680817dc824c48140190aa9d3fb1c0643f5efce445a36bab21afd4b2c5328f41adf668e46b86a27087499f2c8cdbe91a3c717dca18430e04c942a0e74aa"
 )
+
+// hmacKeyDefault HMAC默认密钥，长度64的字节数组转为hex字符串，使用`zcrandom.GenerateRandomBytes`生成
+var hmacKeyDefault []byte
+
+func init() {
+	var err error
+	hmacKeyDefault, err = hex.DecodeString(HMAC_KEY_DEFAULT_HEX)
+	if err != nil {
+		panic(err)
+	}
+}
 
 // Token 凭证结构体
 type Token struct {
@@ -500,6 +516,135 @@ func BuildTokenWithHMAC(token *Token, exp time.Time, keyBytes []byte) error {
 	if token == nil {
 		return errors.New("[-9]token不可传nil")
 	}
+	if keyBytes == nil {
+		keyBytes = hmacKeyDefault
+	}
+
+	// 创建默认token头部
+	tokenHeader := &token.Header
+	if tokenHeader == nil {
+		return errors.New("[-9]token头不可为nil")
+	}
+	// 将token头转为json
+	jsonTokenHeader, err := json.Marshal(&tokenHeader)
+	if err != nil {
+		return fmt.Errorf("[-9]token头json序列化失败: %s", err)
+	}
+	// 对token头做base64编码
+	headerBase64 := base64.RawURLEncoding.EncodeToString(jsonTokenHeader)
+
+	payloads := token.Payloads
+	if payloads == nil {
+		return errors.New("[-9]token有效负载不可为nil")
+	}
+	// 重置凭证过期时间
+	if !exp.IsZero() {
+		payloads["exp"] = exp.Format(zctime.TIME_FORMAT_SIMPLE)
+	}
+	// 将token的有效负载转为json
+	jsonPayloads, err := json.Marshal(payloads)
+	if err != nil {
+		return fmt.Errorf("[-9]token有效负载json序列化失败: %s", err)
+	}
+	// 对token的有效负载做base64编码
+	payloadsBase64 := base64.RawURLEncoding.EncodeToString(jsonPayloads)
+	// 拼接校验内容
+	content := strings.Join([]string{headerBase64, payloadsBase64}, ".")
+
+	var hasher hash.Hash
+	switch tokenHeader.Alg {
+	case ALG_HMAC_SM3:
+		hasher = hmac.New(sm3.New, keyBytes)
+	case ALG_HMAC_SHA256:
+		hasher = hmac.New(sha256.New, keyBytes)
+	default:
+		return fmt.Errorf("[-9]BuildTokenWithHMAC不支持的凭证算法: %s", tokenHeader.Alg)
+	}
+	hasher.Write([]byte(content))
+	sum := hasher.Sum(nil)
+	// 将校验和转为hex字符串
+	sumStr := hex.EncodeToString(sum)
+	// 拼接凭证
+	tokenStr := strings.Join([]string{content, sumStr}, ".")
+	token.TokenStr = tokenStr
 
 	return nil
+}
+
+func CheckTokenWithHMAC(tokenStr string, keyBytes []byte) (*Token, error) {
+	if keyBytes == nil {
+		keyBytes = hmacKeyDefault
+	}
+
+	token := &Token{
+		TokenStr: tokenStr,
+	}
+
+	tmpArr := strings.Split(tokenStr, ".")
+	if len(tmpArr) != 3 {
+		return nil, errors.New("[-5]token格式错误")
+	}
+	headerBase64 := tmpArr[0]
+	payloadsBase64 := tmpArr[1]
+	sumStr := tmpArr[2]
+
+	// 检查token头
+	jsonTokenHeader, err := base64.RawURLEncoding.DecodeString(headerBase64)
+	if err != nil {
+		return nil, fmt.Errorf("[-5]token头base64解码失败: %s", err)
+	}
+	var tokenHeader TokenHeader
+	err = json.Unmarshal(jsonTokenHeader, &tokenHeader)
+	if err != nil {
+		return nil, fmt.Errorf("[-5]token头json反序列化失败: %s", err)
+	}
+	token.Header = tokenHeader
+
+	// 校验和解码
+	sum, err := hex.DecodeString(sumStr)
+	if err != nil {
+		return nil, fmt.Errorf("[-5]token签名hex解码失败: %s", err)
+	}
+	// 校验内容
+	content := strings.Join([]string{headerBase64, payloadsBase64}, ".")
+	var hasher hash.Hash
+	switch tokenHeader.Alg {
+	case ALG_HMAC_SM3:
+		hasher = hmac.New(sm3.New, keyBytes)
+	case ALG_HMAC_SHA256:
+		hasher = hmac.New(sha256.New, keyBytes)
+	default:
+		return nil, fmt.Errorf("[-9]CheckTokenWithHMAC不支持的凭证算法: %s", tokenHeader.Alg)
+	}
+	hasher.Write([]byte(content))
+	if !hmac.Equal(sum, hasher.Sum(nil)) {
+		return nil, fmt.Errorf("[-5]token验签失败: %s", err)
+	}
+
+	// 解析有效负载
+	jsonPayloads, err := base64.RawURLEncoding.DecodeString(payloadsBase64)
+	if err != nil {
+		return nil, fmt.Errorf("[-5]token有效负载base64解码失败: %s", err)
+	}
+	var payloads map[string]string
+	err = json.Unmarshal(jsonPayloads, &payloads)
+	if err != nil {
+		return nil, fmt.Errorf("[-5]token有效负载json反序列化失败: %s", err)
+	}
+	token.Payloads = payloads
+
+	// 凭证过期检查
+	expVal := payloads["exp"]
+	if expVal != "" {
+		now := time.Now()
+		exp, err := time.ParseInLocation(zctime.TIME_FORMAT_SIMPLE, expVal, time.Local)
+		if err != nil {
+			return nil, fmt.Errorf("[-5]token过期时间反序列化失败: %s", err)
+		}
+		if now.After(exp) {
+			return nil, fmt.Errorf("[-1]token过期,过期时间: %s, 检查时间: %s", expVal, now.Format(zctime.TIME_FORMAT_SIMPLE))
+		}
+	}
+
+	return token, nil
 }
