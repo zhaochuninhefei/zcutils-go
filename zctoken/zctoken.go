@@ -52,7 +52,7 @@ func (a *Alg) IsHMAC() bool {
 }
 
 // zctoken支持的凭证算法列表、默认算法以及默认凭证类型(目前只有JWT)
-//goland:noinspection GoSnakeCaseUsage
+//goland:noinspection GoSnakeCaseUsage,GoUnusedConst
 const (
 	ALG_SM2_SM3        Alg = "SM2-SM3"
 	ALG_ECDSA_SHA256   Alg = "ECDSA-SHA256"
