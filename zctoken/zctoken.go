@@ -183,7 +183,7 @@ func PrepareSplTokenStruct(aud string, expSeconds uint64, alg Alg) (*Token, erro
 	return token, nil
 }
 
-// BuildTokenWithECC 使用椭圆曲线签名算法创建凭证
+// BuildTokenWithECC 使用椭圆曲线签名算法构建凭证
 //  @param token 凭证结构体
 //  @param exp 凭证过期时间，如果不打算重置token.Payloads中的过期时间，则这里传入time零值(`time.Time{}`)即可。
 //  @param priKeyPem 私钥pem
@@ -399,7 +399,7 @@ func CheckTokenWithECC(tokenStr string, pubKeyPem []byte) (*Token, error) {
 	return token, nil
 }
 
-// BuildTokenWithGM 使用SM2-SM3算法创建凭证
+// BuildTokenWithGM 使用SM2-SM3算法构建凭证
 //  @param payloads 凭证有效负载
 //  @param exp 凭证过期时间，如果不打算重置payloads中的过期时间，则这里传入time零值(`time.Time{}`)即可。
 //  @param priKey 签名私钥(sm2)
@@ -512,6 +512,11 @@ func CheckTokenWithGM(token string, pubKey *sm2.PublicKey) (map[string]string, e
 	return payloads, nil
 }
 
+// BuildTokenWithHMAC 使用HMAC算法构建凭证
+//  @param token 凭证结构体
+//  @param exp 凭证过期时间，如果不打算重置payloads中的过期时间，则这里传入time零值(`time.Time{}`)即可。
+//  @param keyBytes HMAC密钥
+//  @return error
 func BuildTokenWithHMAC(token *Token, exp time.Time, keyBytes []byte) error {
 	if token == nil {
 		return errors.New("[-9]token不可传nil")
@@ -571,6 +576,11 @@ func BuildTokenWithHMAC(token *Token, exp time.Time, keyBytes []byte) error {
 	return nil
 }
 
+// CheckTokenWithHMAC 使用HMAC算法校验凭证
+//  @param tokenStr 凭证字符串
+//  @param keyBytes HMAC密钥
+//  @return *Token 凭证结构体(指针)
+//  @return error
 func CheckTokenWithHMAC(tokenStr string, keyBytes []byte) (*Token, error) {
 	if keyBytes == nil {
 		keyBytes = hmacKeyDefault
