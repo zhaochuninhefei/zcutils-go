@@ -397,3 +397,42 @@ func TestBuildTokenWithHMACSHA256(t *testing.T) {
 		t.Fatal("NG")
 	}
 }
+
+func BenchmarkBuildTokenWithECC(b *testing.B) {
+	// 从pem文件读取私钥pem
+	privKeyPem, err := ioutil.ReadFile("testdata/sm2_pri_key.pem")
+	if err != nil {
+		b.Fatal(err)
+	}
+	token, err := PrepareSplTokenStruct("anyone", 5, ALG_SM2_SM3)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		err = BuildTokenWithECC(token, time.Time{}, privKeyPem)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkBuildTokenWithHMAC(b *testing.B) {
+	keyBytes, _ := zcrandom.GenerateRandomBytes(64)
+
+	token, err := PrepareSplTokenStruct("anyone", 5, ALG_HMAC_SM3)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		err = BuildTokenWithHMAC(token, time.Time{}, keyBytes)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
