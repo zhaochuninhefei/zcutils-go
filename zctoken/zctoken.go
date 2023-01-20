@@ -27,6 +27,30 @@ import (
 //  - "HMAC-SM3","HMAC-SHA256"，表示为凭证生成HMAC而不是签名，算法后半部是HMAC对应的散列算法。
 type Alg string
 
+// IsECC 凭证算法是否是椭圆曲线算法
+//  @receiver a
+//  @return bool
+func (a *Alg) IsECC() bool {
+	switch *a {
+	case ALG_SM2_SM3, ALG_ECDSA_SHA256, ALG_ED25519_SHA256:
+		return true
+	default:
+		return false
+	}
+}
+
+// IsHMAC 凭证算法是否是HMAC算法
+//  @receiver a
+//  @return bool
+func (a *Alg) IsHMAC() bool {
+	switch *a {
+	case ALG_HMAC_SM3, ALG_HMAC_SHA256:
+		return true
+	default:
+		return false
+	}
+}
+
 // zctoken支持的凭证算法列表、默认算法以及默认凭证类型(目前只有JWT)
 //goland:noinspection GoSnakeCaseUsage
 const (
@@ -37,7 +61,7 @@ const (
 	ALG_HMAC_SHA256    Alg = "HMAC-SHA256"
 
 	// ALG_DEFAULT 默认凭证算法
-	ALG_DEFAULT = ALG_SM2_SM3
+	ALG_DEFAULT = ALG_HMAC_SM3
 	// TYP_DEFAULT 默认凭证类型
 	TYP_DEFAULT = "JWT"
 
@@ -85,10 +109,10 @@ func CreateTokenHeader(alg Alg, typ string) *TokenHeader {
 	}
 }
 
-// CreateTokenHeaderDefault 使用默认配置创建凭证头部
+// CreateTokenHeaderGM 使用SM2-SM3配置创建凭证头部
 //  @return *TokenHeader
-func CreateTokenHeaderDefault() *TokenHeader {
-	return CreateTokenHeader(ALG_DEFAULT, TYP_DEFAULT)
+func CreateTokenHeaderGM() *TokenHeader {
+	return CreateTokenHeader(ALG_SM2_SM3, TYP_DEFAULT)
 }
 
 // CreateStdPayloads 创建标准凭证有效负载
@@ -413,8 +437,8 @@ func BuildTokenWithGM(payloads map[string]string, exp time.Time, priKey *sm2.Pri
 		return "", errors.New("[-1]签名私钥(sm2)不可为nil")
 	}
 
-	// 创建默认token头部
-	tokenHeader := CreateTokenHeaderDefault()
+	// 创建GMtoken头部
+	tokenHeader := CreateTokenHeaderGM()
 	// 将token头转为json
 	jsonTokenHeader, err := json.Marshal(&tokenHeader)
 	if err != nil {
