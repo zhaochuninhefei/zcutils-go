@@ -15,3 +15,6 @@ golang常用工具类库
 
 # zctime
 提供time相关常量定义。
+
+# zcpath
+提供本地目录与文件的相关处理。
