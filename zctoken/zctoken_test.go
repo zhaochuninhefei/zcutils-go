@@ -159,7 +159,8 @@ func TestBuildTokenWithSm2Sm3(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	token, err := PrepareStdTokenStruct("zhaochun", "test", "anyone", "No003", 5, ALG_SM2_SM3)
+	//token, err := PrepareStdTokenStruct("zhaochun", "test", "anyone", "No003", 5, ALG_SM2_SM3)
+	token, err := PrepareSplTokenStruct("anyone", 5, ALG_SM2_SM3)
 	if err != nil {
 		t.Fatal(err)
 	}
