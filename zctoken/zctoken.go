@@ -102,6 +102,8 @@ func CreateStdPayloads(iss string, sub string, aud string, jti string, expSecond
 	return payloads
 }
 
+// TODO 准备一个简单版本的Payloads
+
 // PrepareStdTokenStruct 准备标准凭证结构体
 //
 //  @param iss 签发者
@@ -129,6 +131,8 @@ func PrepareStdTokenStruct(
 	}
 	return token, nil
 }
+
+// TODO 准备一个简单版本的TokenStruct
 
 // BuildToken 创建凭证
 //  @param token 凭证结构体
