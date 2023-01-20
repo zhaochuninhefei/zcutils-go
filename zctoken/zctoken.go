@@ -495,3 +495,11 @@ func CheckTokenWithGM(token string, pubKey *sm2.PublicKey) (map[string]string, e
 
 	return payloads, nil
 }
+
+func BuildTokenWithHMAC(token *Token, exp time.Time, keyBytes []byte) error {
+	if token == nil {
+		return errors.New("[-9]token不可传nil")
+	}
+
+	return nil
+}
