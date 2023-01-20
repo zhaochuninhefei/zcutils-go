@@ -363,13 +363,13 @@ func TestBuildTokenWithHMACSM3(t *testing.T) {
 }
 
 func TestBuildTokenWithHMACSHA256(t *testing.T) {
-	keyBytes, _ := zcrandom.GenerateRandomBytes(64)
+	//keyBytes, _ := zcrandom.GenerateRandomBytes(64)
 
 	token, err := PrepareSplTokenStruct("anyone", 5, ALG_HMAC_SHA256)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = BuildTokenWithHMAC(token, time.Time{}, keyBytes)
+	err = BuildTokenWithHMAC(token, time.Time{}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -381,7 +381,7 @@ func TestBuildTokenWithHMACSHA256(t *testing.T) {
 	}
 	fmt.Printf("token struct : %s\n", string(jsonToken))
 
-	token1, err := CheckTokenWithHMAC(token.TokenStr, keyBytes)
+	token1, err := CheckTokenWithHMAC(token.TokenStr, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -398,7 +398,7 @@ func TestBuildTokenWithHMACSHA256(t *testing.T) {
 	}
 }
 
-func BenchmarkBuildTokenWithECC(b *testing.B) {
+func BenchmarkBuildTokenWithSM2SM3(b *testing.B) {
 	// 从pem文件读取私钥pem
 	privKeyPem, err := ioutil.ReadFile("testdata/sm2_pri_key.pem")
 	if err != nil {
@@ -419,7 +419,49 @@ func BenchmarkBuildTokenWithECC(b *testing.B) {
 	}
 }
 
-func BenchmarkBuildTokenWithHMAC(b *testing.B) {
+func BenchmarkBuildTokenWithECDSA(b *testing.B) {
+	// 从pem文件读取私钥pem
+	privKeyPem, err := ioutil.ReadFile("testdata/ec_pri_key.pem")
+	if err != nil {
+		b.Fatal(err)
+	}
+	token, err := PrepareSplTokenStruct("anyone", 5, ALG_ECDSA_SHA256)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		err = BuildTokenWithECC(token, time.Time{}, privKeyPem)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkBuildTokenWithED25519(b *testing.B) {
+	// 从pem文件读取私钥pem
+	privKeyPem, err := ioutil.ReadFile("testdata/ed_pri_key.pem")
+	if err != nil {
+		b.Fatal(err)
+	}
+	token, err := PrepareSplTokenStruct("anyone", 5, ALG_ED25519_SHA256)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		err = BuildTokenWithECC(token, time.Time{}, privKeyPem)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkBuildTokenWithHMACSM3(b *testing.B) {
 	keyBytes, _ := zcrandom.GenerateRandomBytes(64)
 
 	token, err := PrepareSplTokenStruct("anyone", 5, ALG_HMAC_SM3)
@@ -431,6 +473,161 @@ func BenchmarkBuildTokenWithHMAC(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		err = BuildTokenWithHMAC(token, time.Time{}, keyBytes)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkBuildTokenWithHMACSHA256(b *testing.B) {
+	keyBytes, _ := zcrandom.GenerateRandomBytes(64)
+
+	token, err := PrepareSplTokenStruct("anyone", 5, ALG_HMAC_SHA256)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		err = BuildTokenWithHMAC(token, time.Time{}, keyBytes)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkCheckTokenWithSM2SM3(b *testing.B) {
+	// 从pem文件读取私钥pem
+	privKeyPem, err := ioutil.ReadFile("testdata/sm2_pri_key.pem")
+	if err != nil {
+		b.Fatal(err)
+	}
+	// 从pem文件读取公钥pem
+	pubKeyPem, err := ioutil.ReadFile("testdata/sm2_pub_key.pem")
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	token, err := PrepareSplTokenStruct("anyone", 5, ALG_SM2_SM3)
+	if err != nil {
+		b.Fatal(err)
+	}
+	err = BuildTokenWithECC(token, time.Time{}, privKeyPem)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		_, err := CheckTokenWithECC(token.TokenStr, pubKeyPem)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkCheckTokenWithECDSA(b *testing.B) {
+	// 从pem文件读取私钥pem
+	privKeyPem, err := ioutil.ReadFile("testdata/ec_pri_key.pem")
+	if err != nil {
+		b.Fatal(err)
+	}
+	// 从pem文件读取公钥pem
+	pubKeyPem, err := ioutil.ReadFile("testdata/ec_pub_key.pem")
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	token, err := PrepareSplTokenStruct("anyone", 5, ALG_ECDSA_SHA256)
+	if err != nil {
+		b.Fatal(err)
+	}
+	err = BuildTokenWithECC(token, time.Time{}, privKeyPem)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		_, err := CheckTokenWithECC(token.TokenStr, pubKeyPem)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkCheckTokenWithED25519(b *testing.B) {
+	// 从pem文件读取私钥pem
+	privKeyPem, err := ioutil.ReadFile("testdata/ed_pri_key.pem")
+	if err != nil {
+		b.Fatal(err)
+	}
+	// 从pem文件读取公钥pem
+	pubKeyPem, err := ioutil.ReadFile("testdata/ed_pub_key.pem")
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	token, err := PrepareSplTokenStruct("anyone", 5, ALG_ED25519_SHA256)
+	if err != nil {
+		b.Fatal(err)
+	}
+	err = BuildTokenWithECC(token, time.Time{}, privKeyPem)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		_, err := CheckTokenWithECC(token.TokenStr, pubKeyPem)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkCheckTokenWithHMACSM3(b *testing.B) {
+	keyBytes, _ := zcrandom.GenerateRandomBytes(64)
+
+	token, err := PrepareSplTokenStruct("anyone", 5, ALG_HMAC_SM3)
+	if err != nil {
+		b.Fatal(err)
+	}
+	err = BuildTokenWithHMAC(token, time.Time{}, keyBytes)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		_, err := CheckTokenWithHMAC(token.TokenStr, keyBytes)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkCheckTokenWithHMACSHA256(b *testing.B) {
+	keyBytes, _ := zcrandom.GenerateRandomBytes(64)
+
+	token, err := PrepareSplTokenStruct("anyone", 5, ALG_HMAC_SHA256)
+	if err != nil {
+		b.Fatal(err)
+	}
+	err = BuildTokenWithHMAC(token, time.Time{}, keyBytes)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		_, err := CheckTokenWithHMAC(token.TokenStr, keyBytes)
 		if err != nil {
 			b.Fatal(err)
 		}
