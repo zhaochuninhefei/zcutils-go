@@ -652,7 +652,7 @@ func CheckTokenWithHMAC(tokenStr string, keyBytes []byte) (*Token, error) {
 	}
 	hasher.Write([]byte(content))
 	if !hmac.Equal(sum, hasher.Sum(nil)) {
-		return nil, fmt.Errorf("[-5]token验签失败: %s", err)
+		return nil, errors.New("[-5]token验签失败")
 	}
 
 	// 解析有效负载
