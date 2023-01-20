@@ -20,8 +20,9 @@ import (
 	"time"
 )
 
-// Alg 凭证算法类型，目前支持:"SM2-SM3","ECDSA-SHA256","ED25519-SHA256"。
-//  算法前半部是签名算法，后半部是散列算法。
+// Alg 凭证算法类型，目前支持:"SM2-SM3","ECDSA-SHA256","ED25519-SHA256","HMAC-SM3","HMAC-SHA256"。
+//  - "SM2-SM3","ECDSA-SHA256","ED25519-SHA256"，使用椭圆曲线签名算法生成token，算法前半部是签名算法，后半部是散列算法(用于签名前计算凭证内容摘要)。
+//  - "HMAC-SM3","HMAC-SHA256"，表示为凭证生成HMAC而不是签名，算法后半部是HMAC对应的散列算法。
 type Alg string
 
 // zctoken支持的凭证算法列表、默认算法以及默认凭证类型(目前只有JWT)
@@ -30,6 +31,8 @@ const (
 	ALG_SM2_SM3        Alg = "SM2-SM3"
 	ALG_ECDSA_SHA256   Alg = "ECDSA-SHA256"
 	ALG_ED25519_SHA256 Alg = "ED25519-SHA256"
+	ALG_HMAC_SM3       Alg = "HMAC-SM3"
+	ALG_HMAC_SHA256    Alg = "HMAC-SHA256"
 
 	// ALG_DEFAULT 默认凭证算法
 	ALG_DEFAULT = ALG_SM2_SM3
@@ -102,7 +105,20 @@ func CreateStdPayloads(iss string, sub string, aud string, jti string, expSecond
 	return payloads
 }
 
-// TODO 准备一个简单版本的Payloads
+// CreateSplPayloads 创建简单版凭证有效负载
+//
+//  @param aud 受众
+//  @param expSeconds
+//  @return map[string]string
+func CreateSplPayloads(aud string, expSeconds uint64) map[string]string {
+	now := time.Now()
+	payloads := make(map[string]string)
+	// 受众
+	payloads["aud"] = aud
+	// 过期时间
+	payloads["exp"] = now.Add(time.Second * time.Duration(expSeconds)).Format(zctime.TIME_FORMAT_SIMPLE)
+	return payloads
+}
 
 // PrepareStdTokenStruct 准备标准凭证结构体
 //
@@ -132,14 +148,31 @@ func PrepareStdTokenStruct(
 	return token, nil
 }
 
-// TODO 准备一个简单版本的TokenStruct
+// PrepareSplTokenStruct 准备标准凭证结构体
+//
+//  @param aud 受众
+//  @param expSeconds 过期时间秒数
+//  @param alg 凭证算法
+//  @return *Token 凭证结构体(指针)
+//  @return error
+func PrepareSplTokenStruct(aud string, expSeconds uint64, alg Alg) (*Token, error) {
+	// 创建token结构体
+	token := &Token{
+		Header: TokenHeader{
+			Alg: alg,
+			Typ: TYP_DEFAULT,
+		},
+		Payloads: CreateSplPayloads(aud, expSeconds),
+	}
+	return token, nil
+}
 
-// BuildToken 创建凭证
+// BuildTokenWithECC 使用椭圆曲线签名算法创建凭证
 //  @param token 凭证结构体
 //  @param exp 凭证过期时间，如果不打算重置token.Payloads中的过期时间，则这里传入time零值(`time.Time{}`)即可。
 //  @param priKeyPem 私钥pem
 //  @return error
-func BuildToken(token *Token, exp time.Time, priKeyPem []byte) error {
+func BuildTokenWithECC(token *Token, exp time.Time, priKeyPem []byte) error {
 	if token == nil {
 		return errors.New("[-9]token不可传nil")
 	}
@@ -154,7 +187,7 @@ func BuildToken(token *Token, exp time.Time, priKeyPem []byte) error {
 		return fmt.Errorf("[-9]token头json序列化失败: %s", err)
 	}
 	// 对token头做base64编码
-	headerBase64 := base64.URLEncoding.EncodeToString(jsonTokenHeader)
+	headerBase64 := base64.RawURLEncoding.EncodeToString(jsonTokenHeader)
 
 	payloads := token.Payloads
 	if payloads == nil {
@@ -170,9 +203,9 @@ func BuildToken(token *Token, exp time.Time, priKeyPem []byte) error {
 		return fmt.Errorf("[-9]token有效负载json序列化失败: %s", err)
 	}
 	// 对token的有效负载做base64编码
-	payloadsBase64 := base64.URLEncoding.EncodeToString(jsonPayloads)
+	payloadsBase64 := base64.RawURLEncoding.EncodeToString(jsonPayloads)
 	// 拼接token内容
-	content := headerBase64 + "." + payloadsBase64
+	content := strings.Join([]string{headerBase64, payloadsBase64}, ".")
 
 	priKey, err := x509.ReadPrivateKeyFromPem(priKeyPem, nil)
 	if err != nil {
@@ -222,75 +255,24 @@ func BuildToken(token *Token, exp time.Time, priKeyPem []byte) error {
 			return fmt.Errorf("[-9]凭证算法(%s)与私钥pem不匹配", tokenHeader.Alg)
 		}
 	default:
-		return fmt.Errorf("[-9]不支持的凭证算法: %s", tokenHeader.Alg)
+		return fmt.Errorf("[-9]BuildTokenWithECC不支持的凭证算法: %s", tokenHeader.Alg)
 	}
 
 	// 将签名转为hex字符串
 	signStr := hex.EncodeToString(sign)
 	// 拼接凭证
-	tokenStr := fmt.Sprintf("%s.%s", content, signStr)
+	tokenStr := strings.Join([]string{content, signStr}, ".")
 	token.TokenStr = tokenStr
 
 	return nil
 }
 
-// BuildTokenWithGM 使用SM2-SM3算法创建凭证
-//  @param payloads 凭证有效负载
-//  @param exp 凭证过期时间，如果不打算重置payloads中的过期时间，则这里传入time零值(`time.Time{}`)即可。
-//  @param priKey 签名私钥(sm2)
-//  @return string 凭证字符串
-//  @return error
-func BuildTokenWithGM(payloads map[string]string, exp time.Time, priKey *sm2.PrivateKey) (string, error) {
-	if payloads == nil {
-		return "", errors.New("[-1]凭证有效负载不可为nil")
-	}
-	if priKey == nil {
-		return "", errors.New("[-1]签名私钥(sm2)不可为nil")
-	}
-
-	// 创建默认token头部
-	tokenHeader := CreateTokenHeaderDefault()
-	// 将token头转为json
-	jsonTokenHeader, err := json.Marshal(&tokenHeader)
-	if err != nil {
-		return "", fmt.Errorf("[-9]token头json序列化失败: %s", err)
-	}
-	// 对token头做base64编码
-	headerBase64 := base64.URLEncoding.EncodeToString(jsonTokenHeader)
-
-	// 重置凭证过期时间
-	if !exp.IsZero() {
-		payloads["exp"] = exp.Format(zctime.TIME_FORMAT_SIMPLE)
-	}
-	// 将token的有效负载转为json
-	jsonPayloads, err := json.Marshal(payloads)
-	if err != nil {
-		return "", fmt.Errorf("[-9]token有效负载json序列化失败: %s", err)
-	}
-	// 对token的有效负载做base64编码
-	payloadsBase64 := base64.URLEncoding.EncodeToString(jsonPayloads)
-	// 拼接token内容
-	content := headerBase64 + "." + payloadsBase64
-	// 对token内容做sm3摘要计算
-	digest := sm3.Sm3Sum([]byte(content))
-	// 对摘要做sm2签名
-	sign, err := priKey.Sign(rand.Reader, digest, nil)
-	if err != nil {
-		return "", fmt.Errorf("[-9]token签名失败: %s", err)
-	}
-	// 将签名转为hex字符串
-	signStr := hex.EncodeToString(sign)
-	// 拼接凭证
-	token := fmt.Sprintf("%s.%s", content, signStr)
-	return token, nil
-}
-
-// CheckToken 校验凭证
+// CheckTokenWithECC 使用椭圆曲线签名算法校验凭证
 //  @param tokenStr 凭证字符串
 //  @param pubKeyPem 验签公钥pem
 //  @return *Token 凭证结构体(指针)
 //  @return error
-func CheckToken(tokenStr string, pubKeyPem []byte) (*Token, error) {
+func CheckTokenWithECC(tokenStr string, pubKeyPem []byte) (*Token, error) {
 	token := &Token{
 		TokenStr: tokenStr,
 	}
@@ -304,7 +286,7 @@ func CheckToken(tokenStr string, pubKeyPem []byte) (*Token, error) {
 	signStr := tmpArr[2]
 
 	// 检查token头
-	jsonTokenHeader, err := base64.URLEncoding.DecodeString(headerBase64)
+	jsonTokenHeader, err := base64.RawURLEncoding.DecodeString(headerBase64)
 	if err != nil {
 		return nil, fmt.Errorf("[-5]token头base64解码失败: %s", err)
 	}
@@ -326,7 +308,7 @@ func CheckToken(tokenStr string, pubKeyPem []byte) (*Token, error) {
 		return nil, fmt.Errorf("[-9]公钥pem读取失败: %s", err)
 	}
 	// 签名内容
-	content := headerBase64 + "." + payloadsBase64
+	content := strings.Join([]string{headerBase64, payloadsBase64}, ".")
 	var digest []byte
 	switch tokenHeader.Alg {
 	case ALG_SM2_SM3:
@@ -374,7 +356,7 @@ func CheckToken(tokenStr string, pubKeyPem []byte) (*Token, error) {
 	}
 
 	// 解析有效负载
-	jsonPayloads, err := base64.URLEncoding.DecodeString(payloadsBase64)
+	jsonPayloads, err := base64.RawURLEncoding.DecodeString(payloadsBase64)
 	if err != nil {
 		return nil, fmt.Errorf("[-5]token有效负载base64解码失败: %s", err)
 	}
@@ -401,6 +383,57 @@ func CheckToken(tokenStr string, pubKeyPem []byte) (*Token, error) {
 	return token, nil
 }
 
+// BuildTokenWithGM 使用SM2-SM3算法创建凭证
+//  @param payloads 凭证有效负载
+//  @param exp 凭证过期时间，如果不打算重置payloads中的过期时间，则这里传入time零值(`time.Time{}`)即可。
+//  @param priKey 签名私钥(sm2)
+//  @return string 凭证字符串
+//  @return error
+func BuildTokenWithGM(payloads map[string]string, exp time.Time, priKey *sm2.PrivateKey) (string, error) {
+	if payloads == nil {
+		return "", errors.New("[-1]凭证有效负载不可为nil")
+	}
+	if priKey == nil {
+		return "", errors.New("[-1]签名私钥(sm2)不可为nil")
+	}
+
+	// 创建默认token头部
+	tokenHeader := CreateTokenHeaderDefault()
+	// 将token头转为json
+	jsonTokenHeader, err := json.Marshal(&tokenHeader)
+	if err != nil {
+		return "", fmt.Errorf("[-9]token头json序列化失败: %s", err)
+	}
+	// 对token头做base64编码
+	headerBase64 := base64.RawURLEncoding.EncodeToString(jsonTokenHeader)
+
+	// 重置凭证过期时间
+	if !exp.IsZero() {
+		payloads["exp"] = exp.Format(zctime.TIME_FORMAT_SIMPLE)
+	}
+	// 将token的有效负载转为json
+	jsonPayloads, err := json.Marshal(payloads)
+	if err != nil {
+		return "", fmt.Errorf("[-9]token有效负载json序列化失败: %s", err)
+	}
+	// 对token的有效负载做base64编码
+	payloadsBase64 := base64.RawURLEncoding.EncodeToString(jsonPayloads)
+	// 拼接token内容
+	content := strings.Join([]string{headerBase64, payloadsBase64}, ".")
+	// 对token内容做sm3摘要计算
+	digest := sm3.Sm3Sum([]byte(content))
+	// 对摘要做sm2签名
+	sign, err := priKey.Sign(rand.Reader, digest, nil)
+	if err != nil {
+		return "", fmt.Errorf("[-9]token签名失败: %s", err)
+	}
+	// 将签名转为hex字符串
+	signStr := hex.EncodeToString(sign)
+	// 拼接凭证
+	token := strings.Join([]string{content, signStr}, ".")
+	return token, nil
+}
+
 // CheckTokenWithGM 使用SM2-SM3算法校验凭证
 //  @param token 凭证字符串
 //  @param pubKey 验签公钥(sm2)
@@ -416,7 +449,7 @@ func CheckTokenWithGM(token string, pubKey *sm2.PublicKey) (map[string]string, e
 	signStr := tmpArr[2]
 
 	// 检查token头
-	jsonTokenHeader, err := base64.URLEncoding.DecodeString(headerBase64)
+	jsonTokenHeader, err := base64.RawURLEncoding.DecodeString(headerBase64)
 	if err != nil {
 		return nil, fmt.Errorf("[-5]token头base64解码失败: %s", err)
 	}
@@ -427,7 +460,7 @@ func CheckTokenWithGM(token string, pubKey *sm2.PublicKey) (map[string]string, e
 	}
 
 	// 检查签名
-	content := headerBase64 + "." + payloadsBase64
+	content := strings.Join([]string{headerBase64, payloadsBase64}, ".")
 	digest := sm3.Sm3Sum([]byte(content))
 	sign, err := hex.DecodeString(signStr)
 	if err != nil {
@@ -438,7 +471,7 @@ func CheckTokenWithGM(token string, pubKey *sm2.PublicKey) (map[string]string, e
 	}
 
 	// 解析有效负载
-	jsonPayloads, err := base64.URLEncoding.DecodeString(payloadsBase64)
+	jsonPayloads, err := base64.RawURLEncoding.DecodeString(payloadsBase64)
 	if err != nil {
 		return nil, fmt.Errorf("[-5]token有效负载base64解码失败: %s", err)
 	}

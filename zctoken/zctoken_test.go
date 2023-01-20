@@ -163,7 +163,7 @@ func TestBuildTokenWithSm2Sm3(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = BuildToken(token, time.Time{}, privKeyPem)
+	err = BuildTokenWithECC(token, time.Time{}, privKeyPem)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -175,7 +175,7 @@ func TestBuildTokenWithSm2Sm3(t *testing.T) {
 	}
 	fmt.Printf("token struct : %s\n", string(jsonToken))
 
-	token1, err := CheckToken(token.TokenStr, pubKeyPem)
+	token1, err := CheckTokenWithECC(token.TokenStr, pubKeyPem)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -208,7 +208,7 @@ func TestBuildTokenWithSm2Sm3Timeout(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = BuildToken(token, time.Now().Add(time.Second*1), privKeyPem)
+	err = BuildTokenWithECC(token, time.Now().Add(time.Second*1), privKeyPem)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -222,7 +222,7 @@ func TestBuildTokenWithSm2Sm3Timeout(t *testing.T) {
 
 	time.Sleep(time.Second * 3)
 
-	_, err = CheckToken(token.TokenStr, pubKeyPem)
+	_, err = CheckTokenWithECC(token.TokenStr, pubKeyPem)
 	if err != nil {
 		if strings.HasPrefix(err.Error(), "[-1]token过期") {
 			fmt.Printf("token超时正确返回错误: %s\n", err)
@@ -250,7 +250,7 @@ func TestBuildTokenWithEcdsa(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = BuildToken(token, time.Time{}, privKeyPem)
+	err = BuildTokenWithECC(token, time.Time{}, privKeyPem)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -262,7 +262,7 @@ func TestBuildTokenWithEcdsa(t *testing.T) {
 	}
 	fmt.Printf("token struct : %s\n", string(jsonToken))
 
-	token1, err := CheckToken(token.TokenStr, pubKeyPem)
+	token1, err := CheckTokenWithECC(token.TokenStr, pubKeyPem)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -295,7 +295,7 @@ func TestBuildTokenWithEd25519(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = BuildToken(token, time.Time{}, privKeyPem)
+	err = BuildTokenWithECC(token, time.Time{}, privKeyPem)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -307,7 +307,7 @@ func TestBuildTokenWithEd25519(t *testing.T) {
 	}
 	fmt.Printf("token struct : %s\n", string(jsonToken))
 
-	token1, err := CheckToken(token.TokenStr, pubKeyPem)
+	token1, err := CheckTokenWithECC(token.TokenStr, pubKeyPem)
 	if err != nil {
 		t.Fatal(err)
 	}
