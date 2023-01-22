@@ -20,3 +20,9 @@ golang常用工具类库
 
 # zcpath
 提供本地目录与文件的相关处理。
+
+
+# JetBrains support
+Thanks to JetBrains for supporting open source projects.
+
+<a href="https://jb.gg/OpenSourceSupport" target="_blank">https://jb.gg/OpenSourceSupport.</a>
