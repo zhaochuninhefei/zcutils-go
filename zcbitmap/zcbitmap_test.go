@@ -20,8 +20,8 @@ func TestBitSet32(t *testing.T) {
 	fmt.Println(b.ToBinaryStr(true))
 	fmt.Println(b.ToBinaryStr(false))
 
-	fmt.Printf("第3位是否为1: %t\n", b.TestBit(3))
-	fmt.Printf("第7位是否为1: %t\n", b.TestBit(7))
+	fmt.Printf("第3位是否为1: %t\n", b.CheckBit(3))
+	fmt.Printf("第7位是否为1: %t\n", b.CheckBit(7))
 
 	fmt.Println("将 255 转为 BitSet32")
 	var i = 255
