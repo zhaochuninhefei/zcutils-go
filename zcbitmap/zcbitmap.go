@@ -24,7 +24,7 @@ func (b *BitSet32) ClearBit(i uint) {
 
 // TestBit 检查位图中第 i 位是否为 1
 func (b *BitSet32) TestBit(i uint) bool {
-	mask := uint32(1) << (i % 32)
+	mask := uint32(1) << ((i - 1) % 32)
 	return ((*b) & BitSet32(mask)) != 0
 }
 
