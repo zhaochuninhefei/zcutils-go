@@ -38,4 +38,28 @@ func TestBitSet32(t *testing.T) {
 	fmt.Println(b.ToBinaryStr(true))
 	fmt.Println(b.ToBinaryStr(false))
 
+	fmt.Println("测试 111")
+	s = "111"
+	b, _ = FromBinaryStr(s)
+	fmt.Printf("对应int值: %d\n", b)
+	fmt.Println(b.ToBinaryStr(false))
+
+	fmt.Println("测试 100")
+	s = "100"
+	b, _ = FromBinaryStr(s)
+	fmt.Printf("对应int值: %d\n", b)
+	fmt.Println(b.ToBinaryStr(false))
+
+	fmt.Println("测试 010")
+	s = "010"
+	b, _ = FromBinaryStr(s)
+	fmt.Printf("对应int值: %d\n", b)
+	fmt.Println(b.ToBinaryStr(false))
+
+	fmt.Println("测试 001")
+	s = "001"
+	b, _ = FromBinaryStr(s)
+	fmt.Printf("对应int值: %d\n", b)
+	fmt.Println(b.ToBinaryStr(false))
+
 }
