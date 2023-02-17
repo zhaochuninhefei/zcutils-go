@@ -38,28 +38,76 @@ func TestBitSet32(t *testing.T) {
 	fmt.Println(b.ToBinaryStr(true))
 	fmt.Println(b.ToBinaryStr(false))
 
-	fmt.Println("测试 111")
-	s = "111"
-	b, _ = FromBinaryStr(s)
+}
+
+func TestMatchBitSet32(t *testing.T) {
+	status, _ := FromBinaryStr("101")
+
+	fmt.Println("----- 测试 111")
+	s := "111"
+	b, _ := FromBinaryStr(s)
 	fmt.Printf("对应int值: %d\n", b)
 	fmt.Println(b.ToBinaryStr(false))
 
-	fmt.Println("测试 100")
+	allMatch := status.MatchAll(b)
+	fmt.Printf("101 MatchAll 111: %t\n", allMatch)
+	if allMatch {
+		t.Fatal("101 MatchAll 111 不应该返回 true")
+	}
+	anyMatch := status.MatchAny(b)
+	fmt.Printf("101 MatchAny 111: %t\n", anyMatch)
+	if !anyMatch {
+		t.Fatal("101 MatchAny 111 不应该返回 false")
+	}
+
+	fmt.Println("----- 测试 100")
 	s = "100"
 	b, _ = FromBinaryStr(s)
 	fmt.Printf("对应int值: %d\n", b)
 	fmt.Println(b.ToBinaryStr(false))
 
-	fmt.Println("测试 010")
+	allMatch = status.MatchAll(b)
+	fmt.Printf("101 MatchAll 111: %t\n", allMatch)
+	if !allMatch {
+		t.Fatal("101 MatchAll 111 不应该返回 false")
+	}
+	anyMatch = status.MatchAny(b)
+	fmt.Printf("101 MatchAny 111: %t\n", anyMatch)
+	if !anyMatch {
+		t.Fatal("101 MatchAny 111 不应该返回 false")
+	}
+
+	fmt.Println("----- 测试 010")
 	s = "010"
 	b, _ = FromBinaryStr(s)
 	fmt.Printf("对应int值: %d\n", b)
 	fmt.Println(b.ToBinaryStr(false))
 
-	fmt.Println("测试 001")
+	allMatch = status.MatchAll(b)
+	fmt.Printf("101 MatchAll 111: %t\n", allMatch)
+	if allMatch {
+		t.Fatal("101 MatchAll 111 不应该返回 true")
+	}
+	anyMatch = status.MatchAny(b)
+	fmt.Printf("101 MatchAny 111: %t\n", anyMatch)
+	if anyMatch {
+		t.Fatal("101 MatchAny 111 不应该返回 true")
+	}
+
+	fmt.Println("----- 测试 001")
 	s = "001"
 	b, _ = FromBinaryStr(s)
 	fmt.Printf("对应int值: %d\n", b)
 	fmt.Println(b.ToBinaryStr(false))
 
+	allMatch = status.MatchAll(b)
+	fmt.Printf("101 MatchAll 111: %t\n", allMatch)
+	if !allMatch {
+		t.Fatal("101 MatchAll 111 不应该返回 false")
+	}
+	anyMatch = status.MatchAny(b)
+	fmt.Printf("101 MatchAny 111: %t\n", anyMatch)
+	if !anyMatch {
+		t.Fatal("101 MatchAny 111 不应该返回 false")
+	}
 }

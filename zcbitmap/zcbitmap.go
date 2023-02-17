@@ -63,6 +63,7 @@ func FromBinaryStr(s string) (BitSet32, error) {
 //  当前位图与目标位图bs按位与,结果仍等于bs则表示满足MatchAll
 func (b BitSet32) MatchAll(bs BitSet32) bool {
 	newBs := b & bs
+	fmt.Printf("newBs: %s\n", newBs.ToBinaryStr(false))
 	return newBs == bs
 }
 
@@ -71,5 +72,6 @@ func (b BitSet32) MatchAll(bs BitSet32) bool {
 //  当前位图与目标位图bs按位与,结果大于0则表示满足MatchAny
 func (b BitSet32) MatchAny(bs BitSet32) bool {
 	newBs := b & bs
+	fmt.Printf("newBs: %s\n", newBs.ToBinaryStr(false))
 	return newBs > 0
 }
