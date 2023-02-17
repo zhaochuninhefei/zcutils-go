@@ -293,3 +293,5 @@ func (b *BitSet64) MatchAny(bs BitSet64) bool {
 	fmt.Printf("newBs: %s\n", newBs.ToBinaryStr(false))
 	return newBs > 0
 }
+
+// --------------------------------------------------------------------------
