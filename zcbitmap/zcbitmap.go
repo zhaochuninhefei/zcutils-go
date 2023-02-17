@@ -219,3 +219,77 @@ func (b *BitSet32) MatchAny(bs BitSet32) bool {
 	fmt.Printf("newBs: %s\n", newBs.ToBinaryStr(false))
 	return newBs > 0
 }
+
+// --------------------------------------------------------------------------
+
+// BitSet64 64位的位图
+type BitSet64 uint64
+
+// SetBit 将位图中第i位(从右开始)设置为 1
+//  i 一般取值范围: [1, 64], 超过该范围取对64的求余
+func (b *BitSet64) SetBit(i uint) {
+	mask := uint64(1) << ((i - 1) % 64)
+	*b |= BitSet64(mask)
+}
+
+// ClearBit 将位图中第i位(从右开始)设置为 0
+//  i 一般取值范围: [1, 64], 超过该范围取对64的求余
+func (b *BitSet64) ClearBit(i uint) {
+	mask := uint64(1) << ((i - 1) % 64)
+	*b &= BitSet64(^mask)
+}
+
+// CheckBit 检查位图中第 i 位是否为 1
+//  i 一般取值范围: [1, 64], 超过该范围取对64的求余
+func (b *BitSet64) CheckBit(i uint) bool {
+	mask := uint64(1) << ((i - 1) % 64)
+	return (*b & BitSet64(mask)) != 0
+}
+
+// ToInt 将位图转换为一个整数
+func (b *BitSet64) ToInt() int {
+	return int(*b)
+}
+
+// ConvBs64FromUInt64 将一个整数转换为位图
+func ConvBs64FromUInt64(i uint64) BitSet64 {
+	return BitSet64(i)
+}
+
+// ToBinaryStr 将位图转换为一个二进制字符串
+func (b *BitSet64) ToBinaryStr(paddingZero bool) string {
+	if paddingZero {
+		return fmt.Sprintf("%064b", b.ToInt())
+	}
+	return strconv.FormatUint(uint64(*b), 2)
+}
+
+// ConvBs64FromBinaryStr 将一个二进制字符串转换为位图
+func ConvBs64FromBinaryStr(s string) BitSet64 {
+	if len(s) > 64 {
+		s = s[len(s)-64:]
+	}
+	i, err := strconv.ParseUint(s, 2, 0)
+	if err != nil {
+		return 0
+	}
+	return BitSet64(i)
+}
+
+// MatchAll 检查当前位图是否完全匹配目标位图的所有非零位。
+//  所谓匹配，即目标位图第i位非0的话，当前位图的第i位也非零。
+//  当前位图与目标位图bs按位与,结果仍等于bs则表示满足MatchAll
+func (b *BitSet64) MatchAll(bs BitSet64) bool {
+	newBs := *b & bs
+	fmt.Printf("newBs: %s\n", newBs.ToBinaryStr(false))
+	return newBs == bs
+}
+
+// MatchAny 检查当前位图是否有任意一位匹配目标位图对应的非零位。
+//  所谓匹配，即目标位图第i位非0的话，当前位图的第i位也非零。
+//  当前位图与目标位图bs按位与,结果大于0则表示满足MatchAny
+func (b *BitSet64) MatchAny(bs BitSet64) bool {
+	newBs := *b & bs
+	fmt.Printf("newBs: %s\n", newBs.ToBinaryStr(false))
+	return newBs > 0
+}
