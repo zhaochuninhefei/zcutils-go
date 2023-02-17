@@ -47,15 +47,15 @@ func (b BitSet32) ToBinaryStr(paddingZero bool) string {
 }
 
 // FromBinaryStr 将一个二进制字符串转换为位图
-func FromBinaryStr(s string) (BitSet32, error) {
+func FromBinaryStr(s string) BitSet32 {
 	if len(s) > 32 {
-		return 0, fmt.Errorf("二进制字符串长度(%d)超过了32", len(s))
+		s = s[len(s)-32:]
 	}
 	i, err := strconv.ParseUint(s, 2, 0)
 	if err != nil {
-		return 0, err
+		return 0
 	}
-	return BitSet32(i), nil
+	return BitSet32(i)
 }
 
 // MatchAll 检查当前位图是否完全匹配目标位图的所有非零位。

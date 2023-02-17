@@ -32,7 +32,7 @@ func TestBitSet32(t *testing.T) {
 
 	fmt.Println("将 10101100 转为 BitSet32")
 	s := "10101100"
-	b, _ = FromBinaryStr(s)
+	b = FromBinaryStr(s)
 	fmt.Printf("对应int值: %d\n", b)
 	fmt.Printf("%032b\n", b.ToInt())
 	fmt.Println(b.ToBinaryStr(true))
@@ -41,11 +41,11 @@ func TestBitSet32(t *testing.T) {
 }
 
 func TestMatchBitSet32(t *testing.T) {
-	status, _ := FromBinaryStr("101")
+	status := FromBinaryStr("101")
 
 	fmt.Println("----- 测试 111")
 	s := "111"
-	b, _ := FromBinaryStr(s)
+	b := FromBinaryStr(s)
 	fmt.Printf("对应int值: %d\n", b)
 	fmt.Println(b.ToBinaryStr(false))
 
@@ -62,7 +62,7 @@ func TestMatchBitSet32(t *testing.T) {
 
 	fmt.Println("----- 测试 100")
 	s = "100"
-	b, _ = FromBinaryStr(s)
+	b = FromBinaryStr(s)
 	fmt.Printf("对应int值: %d\n", b)
 	fmt.Println(b.ToBinaryStr(false))
 
@@ -79,7 +79,7 @@ func TestMatchBitSet32(t *testing.T) {
 
 	fmt.Println("----- 测试 010")
 	s = "010"
-	b, _ = FromBinaryStr(s)
+	b = FromBinaryStr(s)
 	fmt.Printf("对应int值: %d\n", b)
 	fmt.Println(b.ToBinaryStr(false))
 
@@ -96,7 +96,7 @@ func TestMatchBitSet32(t *testing.T) {
 
 	fmt.Println("----- 测试 001")
 	s = "001"
-	b, _ = FromBinaryStr(s)
+	b = FromBinaryStr(s)
 	fmt.Printf("对应int值: %d\n", b)
 	fmt.Println(b.ToBinaryStr(false))
 
