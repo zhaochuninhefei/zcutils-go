@@ -24,15 +24,15 @@ func TestBitSet32(t *testing.T) {
 	fmt.Printf("第7位是否为1: %t\n", b.CheckBit(7))
 
 	fmt.Println("将 255 转为 BitSet32")
-	var i = 255
-	b = FromInt(i)
+	var i uint32 = 255
+	b = ConvBs32FromUInt32(i)
 	fmt.Printf("%032b\n", b.ToInt())
 	fmt.Println(b.ToBinaryStr(true))
 	fmt.Println(b.ToBinaryStr(false))
 
 	fmt.Println("将 10101100 转为 BitSet32")
 	s := "10101100"
-	b = FromBinaryStr(s)
+	b = ConvBs32FromBinaryStr(s)
 	fmt.Printf("对应int值: %d\n", b)
 	fmt.Printf("%032b\n", b.ToInt())
 	fmt.Println(b.ToBinaryStr(true))
@@ -41,11 +41,11 @@ func TestBitSet32(t *testing.T) {
 }
 
 func TestMatchBitSet32(t *testing.T) {
-	status := FromBinaryStr("101")
+	status := ConvBs32FromBinaryStr("101")
 
 	fmt.Println("----- 测试 111")
 	s := "111"
-	b := FromBinaryStr(s)
+	b := ConvBs32FromBinaryStr(s)
 	fmt.Printf("对应int值: %d\n", b)
 	fmt.Println(b.ToBinaryStr(false))
 
@@ -62,7 +62,7 @@ func TestMatchBitSet32(t *testing.T) {
 
 	fmt.Println("----- 测试 100")
 	s = "100"
-	b = FromBinaryStr(s)
+	b = ConvBs32FromBinaryStr(s)
 	fmt.Printf("对应int值: %d\n", b)
 	fmt.Println(b.ToBinaryStr(false))
 
@@ -79,7 +79,7 @@ func TestMatchBitSet32(t *testing.T) {
 
 	fmt.Println("----- 测试 010")
 	s = "010"
-	b = FromBinaryStr(s)
+	b = ConvBs32FromBinaryStr(s)
 	fmt.Printf("对应int值: %d\n", b)
 	fmt.Println(b.ToBinaryStr(false))
 
@@ -96,7 +96,7 @@ func TestMatchBitSet32(t *testing.T) {
 
 	fmt.Println("----- 测试 001")
 	s = "001"
-	b = FromBinaryStr(s)
+	b = ConvBs32FromBinaryStr(s)
 	fmt.Printf("对应int值: %d\n", b)
 	fmt.Println(b.ToBinaryStr(false))
 
