@@ -20,3 +20,15 @@ func CreateDir(path string) (bool, error) {
 	}
 	return true, nil
 }
+
+type FileFilterCondition struct {
+	FileNamePrefix string // 文件名前缀
+	FileNameSuffix string // 文件名后缀
+	FileNameRegex  string // 文件名正则表达式
+	ContainsHidden bool   // 是否查找隐藏文件
+	ContainsDir    bool   // 是否查找目录
+}
+
+func FilterFileByCondition(dir string) []string {
+	return nil
+}
