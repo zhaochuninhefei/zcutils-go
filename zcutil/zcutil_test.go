@@ -33,3 +33,19 @@ func TestTempDir(t *testing.T) {
 	}
 	fmt.Println(tmpKeyStore)
 }
+
+func TestPrintStack(t *testing.T) {
+	testPrintStack03()
+}
+
+func testPrintStack03() {
+	testPrintStack02()
+}
+
+func testPrintStack02() {
+	testPrintStack01()
+}
+
+func testPrintStack01() {
+	PrintStack("")
+}
