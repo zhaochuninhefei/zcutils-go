@@ -7,6 +7,9 @@ golang常用工具类库
 提供protobuf相关工具，例如:
 - protoreflect 提供获取目标proto消息的字段信息的相关函数。
 
+# zcargs
+提供对命令行参数的获取与移除函数。
+
 # zcbitmap
 提供位图工具包，包括:
 - BitSet8 8位的位图
@@ -34,6 +37,8 @@ golang常用工具类库
 - `HMAC-SM3` : 采用国密散列算法SM3的HMAC认证码算法
 - `HMAC-SHA256` : 采用散列算法SHA256的HMAC认证码算法
 
+# zcutil
+其他通用处理函数
 
 # JetBrains support
 Thanks to JetBrains for supporting open source projects.
