@@ -17,11 +17,14 @@ import (
 func main() {
 	fmt.Println(os.Args)
 
-	test2 := zcargs.TakeArgFromOsArgs("test2", true)
+	test2 := zcargs.TakeArgFromOsArgs("test2", true, "n")
 	fmt.Printf("test2: %s\n", test2)
 
-	test3 := zcargs.TakeArgFromOsArgs("TEST_3", false)
+	test3 := zcargs.TakeArgFromOsArgs("TEST_3", false, "it")
 	fmt.Printf("test3: %s\n", test3)
+
+	test4 := zcargs.TakeArgFromOsArgs("TEST_4", false, "444")
+	fmt.Printf("test4: %s\n", test4)
 
 	fmt.Println(os.Args)
 }
