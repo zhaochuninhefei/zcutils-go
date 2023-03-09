@@ -6,27 +6,27 @@ import (
 	"time"
 )
 
-type ZcTimeFormat string
+type Format string
 
 //goland:noinspection GoSnakeCaseUsage,GoUnusedConst
 const (
-	TIME_FORMAT_SIMPLE       ZcTimeFormat = "20060102150405"          // 简单格式: yyyyMMddHHmmss
-	TIME_FORMAT_SLASH        ZcTimeFormat = "2006/01/02 15:04:05"     // 斜杠格式: yyyy/MM/dd HH:mm:ss
-	TIME_FORMAT_DASH         ZcTimeFormat = "2006-01-02 15:04:05"     // 横杠格式: yyyy-MM-dd HH:mm:ss
-	TIME_FORMAT_SIMPLE_MILLI ZcTimeFormat = "20060102150405.000"      // 带毫秒的简单格式: yyyyMMddHHmmss.SSS
-	TIME_FORMAT_SLASH_MILLI  ZcTimeFormat = "2006/01/02 15:04:05.000" // 斜杠格式: yyyy/MM/dd HH:mm:ss.SSS
-	TIME_FORMAT_DASH_MILLI   ZcTimeFormat = "2006-01-02 15:04:05.000" // 横杠格式: yyyy-MM-dd HH:mm:ss.SSS
+	TIME_FORMAT_SIMPLE       Format = "20060102150405"          // 简单格式: yyyyMMddHHmmss
+	TIME_FORMAT_SLASH        Format = "2006/01/02 15:04:05"     // 斜杠格式: yyyy/MM/dd HH:mm:ss
+	TIME_FORMAT_DASH         Format = "2006-01-02 15:04:05"     // 横杠格式: yyyy-MM-dd HH:mm:ss
+	TIME_FORMAT_SIMPLE_MILLI Format = "20060102150405.000"      // 带毫秒的简单格式: yyyyMMddHHmmss.SSS
+	TIME_FORMAT_SLASH_MILLI  Format = "2006/01/02 15:04:05.000" // 斜杠格式: yyyy/MM/dd HH:mm:ss.SSS
+	TIME_FORMAT_DASH_MILLI   Format = "2006-01-02 15:04:05.000" // 横杠格式: yyyy-MM-dd HH:mm:ss.SSS
 )
 
-func (ztf ZcTimeFormat) String() string {
+func (ztf Format) String() string {
 	return string(ztf)
 }
 
-func (ztf ZcTimeFormat) FormatTimeToStr(time time.Time) string {
+func (ztf Format) FormatTimeToStr(time time.Time) string {
 	return time.Format(ztf.String())
 }
 
-func (ztf ZcTimeFormat) FormatTimeToSimpleMilliNoPoint(time time.Time) (string, error) {
+func (ztf Format) FormatTimeToSimpleMilliNoPoint(time time.Time) (string, error) {
 	if ztf != TIME_FORMAT_SIMPLE_MILLI {
 		return "", fmt.Errorf("当前ZcTimeFormat无法实现ParseSimpleMilliNoPointToTime方法: %s", ztf.String())
 	}
@@ -34,11 +34,11 @@ func (ztf ZcTimeFormat) FormatTimeToSimpleMilliNoPoint(time time.Time) (string, 
 	return strings.ReplaceAll(timeStr, ".", ""), nil
 }
 
-func (ztf ZcTimeFormat) ParseStrToTime(timeStr string) (time.Time, error) {
+func (ztf Format) ParseStrToTime(timeStr string) (time.Time, error) {
 	return time.Parse(ztf.String(), timeStr)
 }
 
-func (ztf ZcTimeFormat) ParseSimpleMilliNoPointToTime(timeStr string) (time.Time, error) {
+func (ztf Format) ParseSimpleMilliNoPointToTime(timeStr string) (time.Time, error) {
 	if ztf != TIME_FORMAT_SIMPLE_MILLI {
 		return time.Time{}, fmt.Errorf("当前ZcTimeFormat无法实现ParseSimpleMilliNoPointToTime方法: %s", ztf.String())
 	}
