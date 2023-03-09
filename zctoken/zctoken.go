@@ -126,7 +126,7 @@ func CreateTokenHeaderGM() *TokenHeader {
 //  @return map[string]string 凭证有效负载
 func CreateStdPayloads(iss string, sub string, aud string, jti string, expSeconds uint64) map[string]string {
 	now := time.Now()
-	strNow := now.Format(zctime.TIME_FORMAT_SIMPLE)
+	strNow := now.Format(zctime.TIME_FORMAT_SIMPLE.String())
 	payloads := make(map[string]string)
 	// 签发者
 	payloads["iss"] = iss
@@ -137,7 +137,7 @@ func CreateStdPayloads(iss string, sub string, aud string, jti string, expSecond
 	// 编号
 	payloads["jti"] = jti
 	// 过期时间
-	payloads["exp"] = now.Add(time.Second * time.Duration(expSeconds)).Format(zctime.TIME_FORMAT_SIMPLE)
+	payloads["exp"] = now.Add(time.Second * time.Duration(expSeconds)).Format(zctime.TIME_FORMAT_SIMPLE.String())
 	// 生效时间
 	payloads["nbf"] = strNow
 	// 签发时间
@@ -156,7 +156,7 @@ func CreateSplPayloads(aud string, expSeconds uint64) map[string]string {
 	// 受众
 	payloads["aud"] = aud
 	// 过期时间
-	payloads["exp"] = now.Add(time.Second * time.Duration(expSeconds)).Format(zctime.TIME_FORMAT_SIMPLE)
+	payloads["exp"] = now.Add(time.Second * time.Duration(expSeconds)).Format(zctime.TIME_FORMAT_SIMPLE.String())
 	return payloads
 }
 
@@ -235,7 +235,7 @@ func BuildTokenWithECC(token *Token, exp time.Time, priKeyPem []byte) error {
 	}
 	// 重置凭证过期时间
 	if !exp.IsZero() {
-		payloads["exp"] = exp.Format(zctime.TIME_FORMAT_SIMPLE)
+		payloads["exp"] = exp.Format(zctime.TIME_FORMAT_SIMPLE.String())
 	}
 	// 将token的有效负载转为json
 	jsonPayloads, err := json.Marshal(payloads)
@@ -411,12 +411,12 @@ func CheckTokenWithECC(tokenStr string, pubKeyPem []byte) (*Token, error) {
 	expVal := payloads["exp"]
 	if expVal != "" {
 		now := time.Now()
-		exp, err := time.ParseInLocation(zctime.TIME_FORMAT_SIMPLE, expVal, time.Local)
+		exp, err := time.ParseInLocation(zctime.TIME_FORMAT_SIMPLE.String(), expVal, time.Local)
 		if err != nil {
 			return nil, fmt.Errorf("[-5]token过期时间反序列化失败: %s", err)
 		}
 		if now.After(exp) {
-			return nil, fmt.Errorf("[-1]token过期,过期时间: %s, 检查时间: %s", expVal, now.Format(zctime.TIME_FORMAT_SIMPLE))
+			return nil, fmt.Errorf("[-1]token过期,过期时间: %s, 检查时间: %s", expVal, now.Format(zctime.TIME_FORMAT_SIMPLE.String()))
 		}
 	}
 
@@ -449,7 +449,7 @@ func BuildTokenWithGM(payloads map[string]string, exp time.Time, priKey *sm2.Pri
 
 	// 重置凭证过期时间
 	if !exp.IsZero() {
-		payloads["exp"] = exp.Format(zctime.TIME_FORMAT_SIMPLE)
+		payloads["exp"] = exp.Format(zctime.TIME_FORMAT_SIMPLE.String())
 	}
 	// 将token的有效负载转为json
 	jsonPayloads, err := json.Marshal(payloads)
@@ -524,12 +524,12 @@ func CheckTokenWithGM(token string, pubKey *sm2.PublicKey) (map[string]string, e
 	expVal := payloads["exp"]
 	if expVal != "" {
 		now := time.Now()
-		exp, err := time.ParseInLocation(zctime.TIME_FORMAT_SIMPLE, expVal, time.Local)
+		exp, err := time.ParseInLocation(zctime.TIME_FORMAT_SIMPLE.String(), expVal, time.Local)
 		if err != nil {
 			return nil, fmt.Errorf("[-5]token过期时间反序列化失败: %s", err)
 		}
 		if now.After(exp) {
-			return nil, fmt.Errorf("[-1]token过期,过期时间: %s, 检查时间: %s", expVal, now.Format(zctime.TIME_FORMAT_SIMPLE))
+			return nil, fmt.Errorf("[-1]token过期,过期时间: %s, 检查时间: %s", expVal, now.Format(zctime.TIME_FORMAT_SIMPLE.String()))
 		}
 	}
 
@@ -568,7 +568,7 @@ func BuildTokenWithHMAC(token *Token, exp time.Time, keyBytes []byte) error {
 	}
 	// 重置凭证过期时间
 	if !exp.IsZero() {
-		payloads["exp"] = exp.Format(zctime.TIME_FORMAT_SIMPLE)
+		payloads["exp"] = exp.Format(zctime.TIME_FORMAT_SIMPLE.String())
 	}
 	// 将token的有效负载转为json
 	jsonPayloads, err := json.Marshal(payloads)
@@ -671,12 +671,12 @@ func CheckTokenWithHMAC(tokenStr string, keyBytes []byte) (*Token, error) {
 	expVal := payloads["exp"]
 	if expVal != "" {
 		now := time.Now()
-		exp, err := time.ParseInLocation(zctime.TIME_FORMAT_SIMPLE, expVal, time.Local)
+		exp, err := time.ParseInLocation(zctime.TIME_FORMAT_SIMPLE.String(), expVal, time.Local)
 		if err != nil {
 			return nil, fmt.Errorf("[-5]token过期时间反序列化失败: %s", err)
 		}
 		if now.After(exp) {
-			return nil, fmt.Errorf("[-1]token过期,过期时间: %s, 检查时间: %s", expVal, now.Format(zctime.TIME_FORMAT_SIMPLE))
+			return nil, fmt.Errorf("[-1]token过期,过期时间: %s, 检查时间: %s", expVal, now.Format(zctime.TIME_FORMAT_SIMPLE.String()))
 		}
 	}
 
