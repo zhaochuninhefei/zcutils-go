@@ -28,7 +28,7 @@ func (ztf Format) FormatTimeToStr(time time.Time) string {
 
 func (ztf Format) FormatTimeToSimpleMilliNoPoint(time time.Time) (string, error) {
 	if ztf != TIME_FORMAT_SIMPLE_MILLI {
-		return "", fmt.Errorf("当前ZcTimeFormat无法实现ParseSimpleMilliNoPointToTime方法: %s", ztf.String())
+		return "", fmt.Errorf("当前ZcTimeFormat不支持FormatTimeToSimpleMilliNoPoint方法: [%s]", ztf.String())
 	}
 	timeStr := time.Format(ztf.String())
 	return strings.ReplaceAll(timeStr, ".", ""), nil
@@ -40,11 +40,11 @@ func (ztf Format) ParseStrToTime(timeStr string) (time.Time, error) {
 
 func (ztf Format) ParseSimpleMilliNoPointToTime(timeStr string) (time.Time, error) {
 	if ztf != TIME_FORMAT_SIMPLE_MILLI {
-		return time.Time{}, fmt.Errorf("当前ZcTimeFormat无法实现ParseSimpleMilliNoPointToTime方法: %s", ztf.String())
+		return time.Time{}, fmt.Errorf("当前ZcTimeFormat不支持ParseSimpleMilliNoPointToTime方法: [%s]", ztf.String())
 	}
 	if len(timeStr) != 17 {
 		return time.Time{}, fmt.Errorf("试图转换的时间字符串长度不是17: %s", timeStr)
 	}
-	timeNewStr := timeStr[:14] + "." + timeStr[15:]
+	timeNewStr := timeStr[:14] + "." + timeStr[14:]
 	return time.Parse(ztf.String(), timeNewStr)
 }
