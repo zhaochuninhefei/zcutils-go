@@ -126,7 +126,7 @@ func CreateTokenHeaderGM() *TokenHeader {
 //  @return map[string]string 凭证有效负载
 func CreateStdPayloads(iss string, sub string, aud string, jti string, expSeconds uint64) map[string]string {
 	now := time.Now()
-	strNow := now.Format(zctime.TIME_FORMAT_SIMPLE.String())
+	strNow := zctime.TIME_FORMAT_SIMPLE.FormatTimeToStr(now)
 	payloads := make(map[string]string)
 	// 签发者
 	payloads["iss"] = iss
@@ -137,7 +137,7 @@ func CreateStdPayloads(iss string, sub string, aud string, jti string, expSecond
 	// 编号
 	payloads["jti"] = jti
 	// 过期时间
-	payloads["exp"] = now.Add(time.Second * time.Duration(expSeconds)).Format(zctime.TIME_FORMAT_SIMPLE.String())
+	payloads["exp"] = zctime.TIME_FORMAT_SIMPLE.FormatTimeToStr(now.Add(time.Second * time.Duration(expSeconds)))
 	// 生效时间
 	payloads["nbf"] = strNow
 	// 签发时间
@@ -156,7 +156,7 @@ func CreateSplPayloads(aud string, expSeconds uint64) map[string]string {
 	// 受众
 	payloads["aud"] = aud
 	// 过期时间
-	payloads["exp"] = now.Add(time.Second * time.Duration(expSeconds)).Format(zctime.TIME_FORMAT_SIMPLE.String())
+	payloads["exp"] = zctime.TIME_FORMAT_SIMPLE.FormatTimeToStr(now.Add(time.Second * time.Duration(expSeconds)))
 	return payloads
 }
 
@@ -235,7 +235,7 @@ func BuildTokenWithECC(token *Token, exp time.Time, priKeyPem []byte) error {
 	}
 	// 重置凭证过期时间
 	if !exp.IsZero() {
-		payloads["exp"] = exp.Format(zctime.TIME_FORMAT_SIMPLE.String())
+		payloads["exp"] = zctime.TIME_FORMAT_SIMPLE.FormatTimeToStr(exp)
 	}
 	// 将token的有效负载转为json
 	jsonPayloads, err := json.Marshal(payloads)
