@@ -17,3 +17,17 @@ func TestCreateDir(t *testing.T) {
 		}
 	}
 }
+
+func TestFilterFileByCondition(t *testing.T) {
+	condition := FileFilterCondition{
+		FileNamePrefix: "zc",
+		FileNameSuffix: ".go",
+		FileNameRegex:  "zc.*",
+		ContainsHidden: false,
+		ContainsDir:    false,
+	}
+	files := FilterFileByCondition(".", condition)
+	for _, file := range files {
+		fmt.Println(file)
+	}
+}

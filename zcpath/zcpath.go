@@ -3,6 +3,9 @@ package zcpath
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
 )
 
 // CreateDir 创建目录
@@ -29,6 +32,37 @@ type FileFilterCondition struct {
 	ContainsDir    bool   // 是否查找目录
 }
 
-func FilterFileByCondition(dir string) []string {
-	return nil
+// FilterFileByCondition 根据条件过滤文件
+func FilterFileByCondition(dir string, condition FileFilterCondition) []string {
+	// 使用filepath.Walk遍历dir中的文件，并根据condition进行过滤
+	var files []string
+	_ = filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() && !condition.ContainsDir {
+			return nil
+		}
+		if !condition.ContainsHidden && info.Name()[0] == '.' {
+			return nil
+		}
+		if condition.FileNamePrefix != "" && !strings.HasPrefix(info.Name(), condition.FileNamePrefix) {
+			return nil
+		}
+		if condition.FileNameSuffix != "" && !strings.HasSuffix(info.Name(), condition.FileNameSuffix) {
+			return nil
+		}
+		if condition.FileNameRegex != "" {
+			matched, err := regexp.MatchString(condition.FileNameRegex, info.Name())
+			if err != nil {
+				return err
+			}
+			if !matched {
+				return nil
+			}
+		}
+		files = append(files, path)
+		return nil
+	})
+	return files
 }
