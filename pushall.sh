@@ -3,7 +3,7 @@
 # 获取本地提交的最后一个版本
 commit_last_version=$(git log -1 --format="%H")
 # 获取远程仓库上的最后一个版本
-pushed_last_version=$(git ls-remote origin main | cut -f 1)
+pushed_last_version=$(git ls-remote origin HEAD | cut -f 1)
 # 获取远程仓库上的标签列表，并根据版本号进行排序
 tag_list=$(git ls-remote --tags --sort='v:refname')
 # 获取远程仓库上的最后一个标签
