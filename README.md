@@ -26,6 +26,9 @@ golang常用工具类库
 # zcstr
 字符串相关操作包
 
+# zcsync
+同步函数执行工具包
+
 # zctime
 提供time相关处理
 
