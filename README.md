@@ -23,6 +23,9 @@ golang常用工具类库
 # zcrandom
 随机数相关操作包
 
+# zcslice
+切片相关操作包
+
 # zcstr
 字符串相关操作包
 
