@@ -2,6 +2,7 @@ package zcpath
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -22,6 +23,106 @@ func CreateDir(path string) (bool, error) {
 		}
 	}
 	return true, nil
+}
+
+// ClearDir 清空目录
+//  该函数会删除目录下的所有文件和子目录, 但是不会删除目录本身
+func ClearDir(dir string) error {
+	// Open the directory
+	d, err := os.Open(dir)
+	if err != nil {
+		return err
+	}
+	defer func(d *os.File) {
+		err := d.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(d)
+
+	// Read the directory entries
+	names, err := d.Readdirnames(-1)
+	if err != nil {
+		return err
+	}
+
+	// Loop over the entries
+	for _, name := range names {
+		// Join the directory path and the entry name
+		fullPath := filepath.Join(dir, name)
+
+		// Remove the entry using RemoveAll, which works for both files and directories
+		err = os.RemoveAll(fullPath)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func IsDirEmpty(dirPath string) (bool, error) {
+	files, err := ioutil.ReadDir(dirPath)
+	if err != nil {
+		return false, err
+	}
+
+	if len(files) == 0 {
+		return true, nil
+	} else {
+		return false, nil
+	}
+}
+
+func CreateFile(filePath string) error {
+	// 创建文件
+	file, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	// 关闭文件
+	err = file.Close()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// PrintDirTree 打印目录树
+//  @param root 根目录
+//  @param level 打印层级, 0只打印根目录自身，1表示打印一层(根目录下的文件与目录), 2表示打印两层, 依次类推。-1表示打印所有层级。
+//  @param onlyDir 只打印目录
+//  @param showHidden 是否显示隐藏文件
+func PrintDirTree(root string, level int, onlyDir bool, showHidden bool) error {
+	walkFunc := func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !showHidden && info.Name()[0] == '.' {
+			if info.IsDir() {
+				return filepath.SkipDir
+			} else {
+				return nil
+			}
+		}
+		if info.IsDir() {
+			if path == root || level == -1 || strings.Count(path[len(root):], string(os.PathSeparator)) <= level {
+				fmt.Println(path)
+			} else {
+				return filepath.SkipDir
+			}
+		} else {
+			if !onlyDir && (level == -1 || strings.Count(path[len(root):], string(os.PathSeparator)) <= level) {
+				fmt.Println(path)
+			}
+		}
+		return nil
+	}
+	err := filepath.Walk(root, walkFunc)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 type FileFilterCondition struct {
