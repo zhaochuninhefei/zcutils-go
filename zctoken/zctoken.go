@@ -212,26 +212,26 @@ func PrepareSplTokenStruct(aud string, expSeconds uint64, alg Alg) (*Token, erro
 //  @param exp 凭证过期时间，如果不打算重置token.Payloads中的过期时间，则这里传入time零值(`time.Time{}`)即可。
 //  @param priKeyPem 私钥pem
 //  @return error
-func BuildTokenWithECC(token *Token, exp time.Time, priKeyPem []byte) error {
+func BuildTokenWithECC(token *Token, exp time.Time, priKeyPem []byte) (string, error) {
 	if token == nil {
-		return errors.New("[-9]token不可传nil")
+		return "", errors.New("[-9]token不可传nil")
 	}
 	// 创建默认token头部
 	tokenHeader := &token.Header
 	if tokenHeader == nil {
-		return errors.New("[-9]token头不可为nil")
+		return "", errors.New("[-9]token头不可为nil")
 	}
 	// 将token头转为json
 	jsonTokenHeader, err := json.Marshal(&tokenHeader)
 	if err != nil {
-		return fmt.Errorf("[-9]token头json序列化失败: %s", err)
+		return "", fmt.Errorf("[-9]token头json序列化失败: %s", err)
 	}
 	// 对token头做base64编码
 	headerBase64 := base64.RawURLEncoding.EncodeToString(jsonTokenHeader)
 
 	payloads := token.Payloads
 	if payloads == nil {
-		return errors.New("[-9]token有效负载不可为nil")
+		return "", errors.New("[-9]token有效负载不可为nil")
 	}
 	// 重置凭证过期时间
 	if !exp.IsZero() {
@@ -240,7 +240,7 @@ func BuildTokenWithECC(token *Token, exp time.Time, priKeyPem []byte) error {
 	// 将token的有效负载转为json
 	jsonPayloads, err := json.Marshal(payloads)
 	if err != nil {
-		return fmt.Errorf("[-9]token有效负载json序列化失败: %s", err)
+		return "", fmt.Errorf("[-9]token有效负载json序列化失败: %s", err)
 	}
 	// 对token的有效负载做base64编码
 	payloadsBase64 := base64.RawURLEncoding.EncodeToString(jsonPayloads)
@@ -249,7 +249,7 @@ func BuildTokenWithECC(token *Token, exp time.Time, priKeyPem []byte) error {
 
 	priKey, err := x509.ReadPrivateKeyFromPem(priKeyPem, nil)
 	if err != nil {
-		return fmt.Errorf("[-9]私钥pem读取失败: %s", err)
+		return "", fmt.Errorf("[-9]私钥pem读取失败: %s", err)
 	}
 	// 根据Alg选择算法对content做哈希并签名
 	var digest, sign []byte
@@ -261,10 +261,10 @@ func BuildTokenWithECC(token *Token, exp time.Time, priKeyPem []byte) error {
 			// 对摘要做sm2签名
 			sign, err = priKey.Sign(rand.Reader, digest, nil)
 			if err != nil {
-				return fmt.Errorf("[-9]token签名失败: %s", err)
+				return "", fmt.Errorf("[-9]token签名失败: %s", err)
 			}
 		default:
-			return fmt.Errorf("[-9]凭证算法(%s)与私钥pem不匹配", tokenHeader.Alg)
+			return "", fmt.Errorf("[-9]凭证算法(%s)与私钥pem不匹配", tokenHeader.Alg)
 		}
 
 	case ALG_ECDSA_SHA256:
@@ -275,10 +275,10 @@ func BuildTokenWithECC(token *Token, exp time.Time, priKeyPem []byte) error {
 			// 对摘要做sm2签名
 			sign, err = priKey.Sign(rand.Reader, digest, nil)
 			if err != nil {
-				return fmt.Errorf("[-9]token签名失败: %s", err)
+				return "", fmt.Errorf("[-9]token签名失败: %s", err)
 			}
 		default:
-			return fmt.Errorf("[-9]凭证算法(%s)与私钥pem不匹配", tokenHeader.Alg)
+			return "", fmt.Errorf("[-9]凭证算法(%s)与私钥pem不匹配", tokenHeader.Alg)
 		}
 
 	case ALG_ED25519_SHA256:
@@ -289,13 +289,13 @@ func BuildTokenWithECC(token *Token, exp time.Time, priKeyPem []byte) error {
 			// 对摘要做sm2签名
 			sign, err = priKey.Sign(rand.Reader, digest, crypto.Hash(0))
 			if err != nil {
-				return fmt.Errorf("[-9]token签名失败: %s", err)
+				return "", fmt.Errorf("[-9]token签名失败: %s", err)
 			}
 		default:
-			return fmt.Errorf("[-9]凭证算法(%s)与私钥pem不匹配", tokenHeader.Alg)
+			return "", fmt.Errorf("[-9]凭证算法(%s)与私钥pem不匹配", tokenHeader.Alg)
 		}
 	default:
-		return fmt.Errorf("[-9]BuildTokenWithECC不支持的凭证算法: %s", tokenHeader.Alg)
+		return "", fmt.Errorf("[-9]BuildTokenWithECC不支持的凭证算法: %s", tokenHeader.Alg)
 	}
 
 	// 将签名转为hex字符串
@@ -304,7 +304,7 @@ func BuildTokenWithECC(token *Token, exp time.Time, priKeyPem []byte) error {
 	tokenStr := strings.Join([]string{content, signStr}, ".")
 	token.TokenStr = tokenStr
 
-	return nil
+	return tokenStr, nil
 }
 
 // CheckTokenWithECC 使用椭圆曲线签名算法校验凭证
@@ -541,9 +541,9 @@ func CheckTokenWithGM(token string, pubKey *sm2.PublicKey) (map[string]string, e
 //  @param exp 凭证过期时间，如果不打算重置payloads中的过期时间，则这里传入time零值(`time.Time{}`)即可。
 //  @param keyBytes HMAC密钥
 //  @return error
-func BuildTokenWithHMAC(token *Token, exp time.Time, keyBytes []byte) error {
+func BuildTokenWithHMAC(token *Token, exp time.Time, keyBytes []byte) (string, error) {
 	if token == nil {
-		return errors.New("[-9]token不可传nil")
+		return "", errors.New("[-9]token不可传nil")
 	}
 	if keyBytes == nil {
 		keyBytes = hmacKeyDefault
@@ -552,19 +552,19 @@ func BuildTokenWithHMAC(token *Token, exp time.Time, keyBytes []byte) error {
 	// 创建默认token头部
 	tokenHeader := &token.Header
 	if tokenHeader == nil {
-		return errors.New("[-9]token头不可为nil")
+		return "", errors.New("[-9]token头不可为nil")
 	}
 	// 将token头转为json
 	jsonTokenHeader, err := json.Marshal(&tokenHeader)
 	if err != nil {
-		return fmt.Errorf("[-9]token头json序列化失败: %s", err)
+		return "", fmt.Errorf("[-9]token头json序列化失败: %s", err)
 	}
 	// 对token头做base64编码
 	headerBase64 := base64.RawURLEncoding.EncodeToString(jsonTokenHeader)
 
 	payloads := token.Payloads
 	if payloads == nil {
-		return errors.New("[-9]token有效负载不可为nil")
+		return "", errors.New("[-9]token有效负载不可为nil")
 	}
 	// 重置凭证过期时间
 	if !exp.IsZero() {
@@ -573,7 +573,7 @@ func BuildTokenWithHMAC(token *Token, exp time.Time, keyBytes []byte) error {
 	// 将token的有效负载转为json
 	jsonPayloads, err := json.Marshal(payloads)
 	if err != nil {
-		return fmt.Errorf("[-9]token有效负载json序列化失败: %s", err)
+		return "", fmt.Errorf("[-9]token有效负载json序列化失败: %s", err)
 	}
 	// 对token的有效负载做base64编码
 	payloadsBase64 := base64.RawURLEncoding.EncodeToString(jsonPayloads)
@@ -587,7 +587,7 @@ func BuildTokenWithHMAC(token *Token, exp time.Time, keyBytes []byte) error {
 	case ALG_HMAC_SHA256:
 		hasher = hmac.New(sha256.New, keyBytes)
 	default:
-		return fmt.Errorf("[-9]BuildTokenWithHMAC不支持的凭证算法: %s", tokenHeader.Alg)
+		return "", fmt.Errorf("[-9]BuildTokenWithHMAC不支持的凭证算法: %s", tokenHeader.Alg)
 	}
 	hasher.Write([]byte(content))
 	sum := hasher.Sum(nil)
@@ -597,7 +597,7 @@ func BuildTokenWithHMAC(token *Token, exp time.Time, keyBytes []byte) error {
 	tokenStr := strings.Join([]string{content, sumStr}, ".")
 	token.TokenStr = tokenStr
 
-	return nil
+	return tokenStr, nil
 }
 
 // CheckTokenWithHMAC 使用HMAC算法校验凭证

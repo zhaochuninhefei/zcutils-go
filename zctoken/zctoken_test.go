@@ -165,11 +165,11 @@ func TestBuildTokenWithSm2Sm3(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = BuildTokenWithECC(token, time.Time{}, privKeyPem)
+	tokenStr, err := BuildTokenWithECC(token, time.Time{}, privKeyPem)
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Printf("token: %s\n", token.TokenStr)
+	fmt.Printf("token: %s\n", tokenStr)
 
 	jsonToken, err := json.Marshal(token)
 	if err != nil {
@@ -177,7 +177,7 @@ func TestBuildTokenWithSm2Sm3(t *testing.T) {
 	}
 	fmt.Printf("token struct : %s\n", string(jsonToken))
 
-	token1, err := CheckTokenWithECC(token.TokenStr, pubKeyPem)
+	token1, err := CheckTokenWithECC(tokenStr, pubKeyPem)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -210,11 +210,11 @@ func TestBuildTokenWithSm2Sm3Timeout(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = BuildTokenWithECC(token, time.Now().Add(time.Second*1), privKeyPem)
+	tokenStr, err := BuildTokenWithECC(token, time.Now().Add(time.Second*1), privKeyPem)
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Printf("token: %s\n", token.TokenStr)
+	fmt.Printf("token: %s\n", tokenStr)
 
 	jsonToken, err := json.Marshal(token)
 	if err != nil {
@@ -224,7 +224,7 @@ func TestBuildTokenWithSm2Sm3Timeout(t *testing.T) {
 
 	time.Sleep(time.Second * 3)
 
-	_, err = CheckTokenWithECC(token.TokenStr, pubKeyPem)
+	_, err = CheckTokenWithECC(tokenStr, pubKeyPem)
 	if err != nil {
 		if strings.HasPrefix(err.Error(), "[-1]token过期") {
 			fmt.Printf("token超时正确返回错误: %s\n", err)
@@ -252,11 +252,11 @@ func TestBuildTokenWithEcdsa(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = BuildTokenWithECC(token, time.Time{}, privKeyPem)
+	tokenStr, err := BuildTokenWithECC(token, time.Time{}, privKeyPem)
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Printf("token: %s\n", token.TokenStr)
+	fmt.Printf("token: %s\n", tokenStr)
 
 	jsonToken, err := json.Marshal(token)
 	if err != nil {
@@ -264,7 +264,7 @@ func TestBuildTokenWithEcdsa(t *testing.T) {
 	}
 	fmt.Printf("token struct : %s\n", string(jsonToken))
 
-	token1, err := CheckTokenWithECC(token.TokenStr, pubKeyPem)
+	token1, err := CheckTokenWithECC(tokenStr, pubKeyPem)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -297,11 +297,11 @@ func TestBuildTokenWithEd25519(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = BuildTokenWithECC(token, time.Time{}, privKeyPem)
+	tokenStr, err := BuildTokenWithECC(token, time.Time{}, privKeyPem)
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Printf("token: %s\n", token.TokenStr)
+	fmt.Printf("token: %s\n", tokenStr)
 
 	jsonToken, err := json.Marshal(token)
 	if err != nil {
@@ -309,7 +309,7 @@ func TestBuildTokenWithEd25519(t *testing.T) {
 	}
 	fmt.Printf("token struct : %s\n", string(jsonToken))
 
-	token1, err := CheckTokenWithECC(token.TokenStr, pubKeyPem)
+	token1, err := CheckTokenWithECC(tokenStr, pubKeyPem)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -333,11 +333,11 @@ func TestBuildTokenWithHMACSM3(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = BuildTokenWithHMAC(token, time.Time{}, keyBytes)
+	tokenStr, err := BuildTokenWithHMAC(token, time.Time{}, keyBytes)
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Printf("token: %s\n", token.TokenStr)
+	fmt.Printf("token: %s\n", tokenStr)
 
 	jsonToken, err := json.Marshal(token)
 	if err != nil {
@@ -345,7 +345,7 @@ func TestBuildTokenWithHMACSM3(t *testing.T) {
 	}
 	fmt.Printf("token struct : %s\n", string(jsonToken))
 
-	token1, err := CheckTokenWithHMAC(token.TokenStr, keyBytes)
+	token1, err := CheckTokenWithHMAC(tokenStr, keyBytes)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -369,11 +369,11 @@ func TestBuildTokenWithHMACSHA256(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = BuildTokenWithHMAC(token, time.Time{}, nil)
+	tokenStr, err := BuildTokenWithHMAC(token, time.Time{}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Printf("token: %s\n", token.TokenStr)
+	fmt.Printf("token: %s\n", tokenStr)
 
 	jsonToken, err := json.Marshal(token)
 	if err != nil {
@@ -381,7 +381,7 @@ func TestBuildTokenWithHMACSHA256(t *testing.T) {
 	}
 	fmt.Printf("token struct : %s\n", string(jsonToken))
 
-	token1, err := CheckTokenWithHMAC(token.TokenStr, nil)
+	token1, err := CheckTokenWithHMAC(tokenStr, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -412,7 +412,7 @@ func BenchmarkBuildTokenWithSM2SM3(b *testing.B) {
 	b.ReportAllocs()
 
 	for i := 0; i < b.N; i++ {
-		err = BuildTokenWithECC(token, time.Time{}, privKeyPem)
+		_, err = BuildTokenWithECC(token, time.Time{}, privKeyPem)
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -433,7 +433,7 @@ func BenchmarkBuildTokenWithECDSA(b *testing.B) {
 	b.ReportAllocs()
 
 	for i := 0; i < b.N; i++ {
-		err = BuildTokenWithECC(token, time.Time{}, privKeyPem)
+		_, err = BuildTokenWithECC(token, time.Time{}, privKeyPem)
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -454,7 +454,7 @@ func BenchmarkBuildTokenWithED25519(b *testing.B) {
 	b.ReportAllocs()
 
 	for i := 0; i < b.N; i++ {
-		err = BuildTokenWithECC(token, time.Time{}, privKeyPem)
+		_, err = BuildTokenWithECC(token, time.Time{}, privKeyPem)
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -472,7 +472,7 @@ func BenchmarkBuildTokenWithHMACSM3(b *testing.B) {
 	b.ReportAllocs()
 
 	for i := 0; i < b.N; i++ {
-		err = BuildTokenWithHMAC(token, time.Time{}, keyBytes)
+		_, err = BuildTokenWithHMAC(token, time.Time{}, keyBytes)
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -490,7 +490,7 @@ func BenchmarkBuildTokenWithHMACSHA256(b *testing.B) {
 	b.ReportAllocs()
 
 	for i := 0; i < b.N; i++ {
-		err = BuildTokenWithHMAC(token, time.Time{}, keyBytes)
+		_, err = BuildTokenWithHMAC(token, time.Time{}, keyBytes)
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -513,7 +513,7 @@ func BenchmarkCheckTokenWithSM2SM3(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	err = BuildTokenWithECC(token, time.Time{}, privKeyPem)
+	_, err = BuildTokenWithECC(token, time.Time{}, privKeyPem)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -544,7 +544,7 @@ func BenchmarkCheckTokenWithECDSA(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	err = BuildTokenWithECC(token, time.Time{}, privKeyPem)
+	_, err = BuildTokenWithECC(token, time.Time{}, privKeyPem)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -575,7 +575,7 @@ func BenchmarkCheckTokenWithED25519(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	err = BuildTokenWithECC(token, time.Time{}, privKeyPem)
+	_, err = BuildTokenWithECC(token, time.Time{}, privKeyPem)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -597,7 +597,7 @@ func BenchmarkCheckTokenWithHMACSM3(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	err = BuildTokenWithHMAC(token, time.Time{}, keyBytes)
+	_, err = BuildTokenWithHMAC(token, time.Time{}, keyBytes)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -619,7 +619,7 @@ func BenchmarkCheckTokenWithHMACSHA256(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	err = BuildTokenWithHMAC(token, time.Time{}, keyBytes)
+	_, err = BuildTokenWithHMAC(token, time.Time{}, keyBytes)
 	if err != nil {
 		b.Fatal(err)
 	}
