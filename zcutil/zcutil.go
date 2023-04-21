@@ -35,3 +35,11 @@ func PrintStack(msg string) {
 		}
 	}
 }
+
+// If 判断条件是否为真，如果为真则返回第一个参数，否则返回第二个参数
+func If(condition bool, trueVal, falseVal interface{}) interface{} {
+	if condition {
+		return trueVal
+	}
+	return falseVal
+}
