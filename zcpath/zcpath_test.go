@@ -2,6 +2,7 @@ package zcpath
 
 import (
 	"fmt"
+	"os"
 	"testing"
 )
 
@@ -81,6 +82,52 @@ func TestClearDir(t *testing.T) {
 		t.Fatal("测试目录不为空")
 	} else {
 		fmt.Println("测试目录清空成功")
+	}
+}
+
+func TestFileExists(t *testing.T) {
+	// 创建测试文件
+	err := CreateFile("testdata/testfile.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 判断文件是否存在
+	exists, err := FileExists("testdata/testfile.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !exists {
+		t.Fatal("文件不存在")
+	} else {
+		fmt.Println("文件存在")
+	}
+
+	// 判断不存在的文件是否存在
+	exists, err = FileExists("testdata/testfile1.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if exists {
+		t.Fatal("文件存在")
+	} else {
+		fmt.Println("文件不存在")
+	}
+
+	// path存在但是不是文件
+	exists, err = FileExists("testdata")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if exists {
+		t.Fatal("文件存在")
+	} else {
+		fmt.Println("文件不存在")
+	}
+
+	// 删除测试文件
+	err = os.Remove("testdata/testfile.txt")
+	if err != nil {
+		t.Fatal(err)
 	}
 }
 

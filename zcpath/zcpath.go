@@ -132,6 +132,25 @@ func PrintDirTree(root string, level int, onlyDir bool, showHidden bool) error {
 	return nil
 }
 
+// FileExists 判断文件是否存在，且是不是文件
+//  @param path 文件路径
+func FileExists(path string) (bool, error) {
+	// 判断文件是否存在
+	fileInfo, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		} else {
+			return false, err
+		}
+	}
+	// 判断是否是目录
+	if fileInfo.IsDir() {
+		return false, nil
+	}
+	return true, nil
+}
+
 type FileFilterCondition struct {
 	FileNamePrefix string // 文件名前缀
 	FileNameSuffix string // 文件名后缀
