@@ -2,6 +2,7 @@ package zcpath
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -149,6 +150,40 @@ func FileExists(path string) (bool, error) {
 		return false, nil
 	}
 	return true, nil
+}
+
+// FileCopy 拷贝文件
+//  @param src 源文件路径
+//  @param dst 目标文件路径
+func FileCopy(src string, dst string) error {
+	// 打开源文件
+	srcFile, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer func(srcFile *os.File) {
+		err := srcFile.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(srcFile)
+	// 创建目标文件
+	dstFile, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer func(dstFile *os.File) {
+		err := dstFile.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(dstFile)
+	// 拷贝文件
+	_, err = io.Copy(dstFile, srcFile)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 type FileFilterCondition struct {

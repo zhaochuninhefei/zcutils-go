@@ -144,3 +144,37 @@ func TestFilterFileByCondition(t *testing.T) {
 		fmt.Println(file)
 	}
 }
+
+func TestFileCopy(t *testing.T) {
+	// 创建测试文件
+	err := CreateFile("testdata/testfile.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 复制文件
+	err = FileCopy("testdata/testfile.txt", "testdata/testfile1.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 判断文件是否存在
+	exists, err := FileExists("testdata/testfile1.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !exists {
+		t.Fatal("文件不存在")
+	} else {
+		fmt.Println("文件存在")
+	}
+	// 删除测试文件
+	err = os.Remove("testdata/testfile.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 删除测试文件
+	err = os.Remove("testdata/testfile1.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+}
