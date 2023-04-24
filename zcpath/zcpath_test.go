@@ -176,5 +176,37 @@ func TestFileCopy(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
 
+func TestFileCopyToDir(t *testing.T) {
+	// 创建测试文件
+	err := CreateFile("testdata/testfile.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 复制文件
+	err = FileCopyToDir("testdata/testfile.txt", "testdata/subdir1/subdir11")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 判断文件是否存在
+	exists, err := FileExists("testdata/subdir1/subdir11/testfile.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !exists {
+		t.Fatal("文件不存在")
+	} else {
+		fmt.Println("文件存在")
+	}
+	// 删除测试文件
+	err = os.Remove("testdata/testfile.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 删除测试文件
+	err = os.Remove("testdata/subdir1/subdir11/testfile.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
 }

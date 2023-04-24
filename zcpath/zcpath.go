@@ -186,6 +186,27 @@ func FileCopy(src string, dst string) error {
 	return nil
 }
 
+// FileCopyToDir 拷贝文件到目录
+//  @param src 源文件路径
+//  @param dstDir 目标目录
+func FileCopyToDir(src string, dstDir string) error {
+	// 获取源文件名
+	srcFileName := filepath.Base(src)
+	// 拼接目标文件路径
+	dstFilePath := filepath.Join(dstDir, srcFileName)
+	// 创建目标目录
+	ok, err := CreateDir(dstDir)
+	if !ok && err != nil {
+		return err
+	}
+	// 拷贝文件
+	err = FileCopy(src, dstFilePath)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 type FileFilterCondition struct {
 	FileNamePrefix string // 文件名前缀
 	FileNameSuffix string // 文件名后缀
