@@ -15,7 +15,7 @@ import (
 //  @return bool 创建成功与否
 //  @return error
 func CreateDir(path string) (bool, error) {
-	if _, err := os.Stat(path); err == nil {
+	if dirInfo, err := os.Stat(path); err == nil && dirInfo.IsDir() {
 		return true, fmt.Errorf("该目录已经存在: %s", path)
 	} else {
 		err := os.MkdirAll(path, 0755)
