@@ -249,3 +249,22 @@ func FilterFileByCondition(dir string, condition FileFilterCondition) []string {
 	})
 	return files
 }
+
+// ChmodDir 修改目录权限
+func ChmodDir(dir string, mode os.FileMode) error {
+	// 修改目录权限
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		err = os.Chmod(path, mode)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
