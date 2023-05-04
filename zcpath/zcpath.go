@@ -133,6 +133,44 @@ func PrintDirTree(root string, level int, onlyDir bool, showHidden bool) error {
 	return nil
 }
 
+func PrintDirTreeWithMode(root string, level int, onlyDir bool, showHidden bool) error {
+	walkFunc := func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !showHidden && info.Name()[0] == '.' {
+			if info.IsDir() {
+				return filepath.SkipDir
+			} else {
+				return nil
+			}
+		}
+		if info.IsDir() {
+			if path == root || level == -1 || strings.Count(path[len(root):], string(os.PathSeparator)) <= level {
+				// 获取文件权限
+				mode := info.Mode()
+				// 打印文件权限
+				fmt.Printf("%s %s\n", path, mode.String())
+			} else {
+				return filepath.SkipDir
+			}
+		} else {
+			if !onlyDir && (level == -1 || strings.Count(path[len(root):], string(os.PathSeparator)) <= level) {
+				// 获取文件权限
+				mode := info.Mode()
+				// 打印文件权限
+				fmt.Printf("%s %s\n", path, mode.String())
+			}
+		}
+		return nil
+	}
+	err := filepath.Walk(root, walkFunc)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // FileExists 判断文件是否存在，且是不是文件
 //  @param path 文件路径
 func FileExists(path string) (bool, error) {

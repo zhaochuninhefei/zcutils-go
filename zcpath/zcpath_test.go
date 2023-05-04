@@ -210,3 +210,91 @@ func TestFileCopyToDir(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestChmodDir(t *testing.T) {
+	// 创建测试目录 chmod_dir/subdir1
+	ok, err := CreateDir("testdata/chmod_dir/subdir1")
+	if !ok && err != nil {
+		t.Fatal(err)
+	}
+
+	// 创建测试文件 chmod_dir/testfile1.txt
+	err = CreateFile("testdata/chmod_dir/testfile1.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 创建测试文件 chmod_dir/testfile2.txt
+	err = CreateFile("testdata/chmod_dir/testfile2.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 创建测试文件 chmod_dir/subdir1/testfile3.txt
+	err = CreateFile("testdata/chmod_dir/subdir1/testfile3.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 创建测试目录 chmod_dir/subdir2
+	ok, err = CreateDir("testdata/chmod_dir/subdir2")
+	if !ok && err != nil {
+		t.Fatal(err)
+	}
+	if !ok {
+		t.Fatal("创建目录失败")
+	}
+	// PrintDirTreeWithMode
+	err = PrintDirTreeWithMode("testdata/chmod_dir", -1, false, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println("测试数据准备完毕")
+
+	// 修改目录权限
+	err = ChmodDir("testdata/chmod_dir", os.ModePerm)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// PrintDirTreeWithMode
+	err = PrintDirTreeWithMode("testdata/chmod_dir", -1, false, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 查看目录权限
+	fileInfo, err := os.Stat("testdata/chmod_dir")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 判断目录权限是否是0777
+	if (fileInfo.Mode() & os.ModePerm) != 0777 {
+		t.Fatal("目录权限不是0777")
+	} else {
+		fmt.Println("目录权限是0777")
+	}
+
+	// 修改目录权限
+	err = ChmodDir("testdata/chmod_dir", 0755)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// PrintDirTreeWithMode
+	err = PrintDirTreeWithMode("testdata/chmod_dir", -1, false, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 查看目录权限
+	fileInfo, err = os.Stat("testdata/chmod_dir")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 判断目录权限是否是0755
+	if (fileInfo.Mode() & os.ModePerm) != 0755 {
+		t.Fatal("目录权限不是0755")
+	} else {
+		fmt.Println("目录权限是0755")
+	}
+
+	// 删除测试目录 chmod_dir
+	err = os.RemoveAll("testdata/chmod_dir")
+	if err != nil {
+		t.Fatal(err)
+	}
+}
