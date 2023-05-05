@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-// CreateDir 创建目录
+// CreateDir 创建目录,若目录已经存在，会返回错误信息但bool返回true。
 //  @param path 目录路径
 //  @return bool 创建成功与否
 //  @return error
@@ -69,6 +69,7 @@ func ClearDir(dir string) error {
 	return nil
 }
 
+// IsDirEmpty 判断目录是否为空
 func IsDirEmpty(dirPath string) (bool, error) {
 	files, err := ioutil.ReadDir(dirPath)
 	if err != nil {
@@ -82,6 +83,7 @@ func IsDirEmpty(dirPath string) (bool, error) {
 	}
 }
 
+// CreateFile 创建文件
 func CreateFile(filePath string) error {
 	// 创建文件
 	file, err := os.Create(filePath)
@@ -94,6 +96,17 @@ func CreateFile(filePath string) error {
 		return err
 	}
 	return nil
+}
+
+// RemoveFile 删除文件, 如果文件不存在，不报错
+func RemoveFile(filePath string) error {
+	err := os.Remove(filePath)
+	// 如果文件不存在，不报错
+	if err != nil && os.IsNotExist(err) {
+		return nil
+	} else {
+		return err
+	}
 }
 
 // PrintDirTree 打印目录树
