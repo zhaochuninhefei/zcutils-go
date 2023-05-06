@@ -258,6 +258,54 @@ func FileCopyToDir(src string, dstDir string) error {
 	return nil
 }
 
+// FileCopyFromDirToDir 拷贝源目录下所有文件到目标目录
+//  @param srcDir 源目录
+//  @param dstDir 目标目录
+func FileCopyFromDirToDir(srcDir string, dstDir string) error {
+	// 检查srcDir是否存在,是否是目录
+	srcInfo, err := os.Stat(srcDir)
+	if err != nil {
+		return err
+	}
+	if !srcInfo.IsDir() {
+		return fmt.Errorf("srcDir(%s)不是目录", srcDir)
+	}
+	// 创建目标目录
+	ok, err := CreateDir(dstDir)
+	if !ok && err != nil {
+		return err
+	}
+	// 获取源目录下所有文件和目录
+	files, err := ioutil.ReadDir(srcDir)
+	if err != nil {
+		return err
+	}
+	// 遍历所有文件和目录
+	for _, file := range files {
+		srcPath := filepath.Join(srcDir, file.Name())
+		destPath := filepath.Join(dstDir, file.Name())
+
+		if file.IsDir() {
+			// 如果是目录，递归拷贝目录
+			err = FileCopyFromDirToDir(srcPath, destPath)
+			if err != nil {
+				return err
+			}
+		} else {
+			// 如果是文件，拷贝文件
+			data, err := ioutil.ReadFile(srcPath)
+			if err != nil {
+				return err
+			}
+			err = ioutil.WriteFile(destPath, data, file.Mode())
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 type FileFilterCondition struct {
 	FileNamePrefix string // 文件名前缀
 	FileNameSuffix string // 文件名后缀

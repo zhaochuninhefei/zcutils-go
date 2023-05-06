@@ -331,3 +331,60 @@ func TestRemoveFile(t *testing.T) {
 		fmt.Println("文件不存在")
 	}
 }
+
+func TestFileCopyFromDirToDir(t *testing.T) {
+	// 创建测试目录
+	ok, err := CreateDir("testdata/srcDir")
+	if !ok && err != nil {
+		t.Fatal(err)
+	}
+	// 创建测试文件 testfile1
+	err = CreateFile("testdata/srcDir/testfile1.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 创建测试文件 testfile2
+	err = CreateFile("testdata/srcDir/testfile2.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 创建测试子目录 subdir1
+	ok, err = CreateDir("testdata/srcDir/subdir1")
+	if !ok && err != nil {
+		t.Fatal(err)
+	}
+	// 创建测试文件 subdir1/testfile3
+	err = CreateFile("testdata/srcDir/subdir1/testfile3.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 打印测试目录
+	fmt.Println("源目录结构:")
+	err = PrintDirTree("testdata/srcDir", -1, false, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 测试FileCopyFromDirToDir
+	err = FileCopyFromDirToDir("testdata/srcDir", "testdata/dstDir")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 检查目标目录
+	fmt.Println("目标目录结构:")
+	err = PrintDirTree("testdata/dstDir", -1, false, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 删除测试目录
+	err = os.RemoveAll("testdata/srcDir")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = os.RemoveAll("testdata/dstDir")
+	if err != nil {
+		t.Fatal(err)
+	}
+}
