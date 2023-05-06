@@ -258,7 +258,7 @@ func FileCopyToDir(src string, dstDir string) error {
 	return nil
 }
 
-// FileCopyFromDirToDir 拷贝源目录下所有文件到目标目录
+// FileCopyFromDirToDir 拷贝源目录下所有文件到目标目录，包括子目录及子目录下的文件
 //  @param srcDir 源目录
 //  @param dstDir 目标目录
 func FileCopyFromDirToDir(srcDir string, dstDir string) error {
