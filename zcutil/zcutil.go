@@ -67,7 +67,7 @@ func CallAsyncFuncAndWaitByLog(logPath string, funcAsync func() error, funcHandl
 		return err
 	}
 
-	fmt.Printf("==== tail %s start ====", logPath)
+	fmt.Printf("==== tail %s start ====\n", logPath)
 	// 配置超时Context, 默认90秒
 	// 如果timeoutSeconds<=0, 则使用默认值90秒
 	if timeoutSeconds <= 0 {
