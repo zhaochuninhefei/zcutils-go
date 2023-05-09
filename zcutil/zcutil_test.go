@@ -201,6 +201,32 @@ func TestCallAsyncFuncAndWaitByLog(t *testing.T) {
 	}
 }
 
+func TestCallAsyncFuncAndWaitByFlag(t *testing.T) {
+	// 标志文件与日志文件路径
+	flagFilePath := "testdata/test.over"
+	logFilePath := "testdata/test.log"
+
+	// 测试正常结束
+	lines, err := CallAsyncFuncAndWaitByFlag(flagFilePath, logFilePath, func() error {
+		fmt.Println("aysnc func start...")
+		// goruntine 执行日志写入
+		go func() {
+			for i := 0; i < 10; i++ {
+				// 向logFilePath写入日志
+				_ = writeLog(logFilePath, fmt.Sprintf("test log %d", i))
+			}
+			_ = writeLog(flagFilePath, "over")
+		}()
+		return nil
+	}, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(lines) != 10 {
+		t.Fatal("未能读取到所有日志")
+	}
+}
+
 // writeLog 向日志文件logPath追加写入line并换行,如果日志文件不存在就创建新文件
 func writeLog(logPath string, line string) error {
 	// 打开日志文件

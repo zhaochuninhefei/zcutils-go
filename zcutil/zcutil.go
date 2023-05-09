@@ -10,6 +10,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/nxadm/tail"
 	"os"
+	"path/filepath"
 	"runtime"
 	"time"
 )
@@ -133,17 +134,17 @@ func CallAsyncFuncAndWaitByFlag(flagPath, logPath string, funcAsync func() error
 		return nil, err
 	}
 
-	// 监听标志文件
-	flagFile, err := os.Open(flagPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to open flag file: %s", flagPath)
-	}
-	defer func(flagFile *os.File) {
-		err := flagFile.Close()
-		if err != nil {
-			panic(err)
-		}
-	}(flagFile)
+	//// 监听标志文件
+	//flagFile, err := os.Open(flagPath)
+	//if err != nil {
+	//	return nil, fmt.Errorf("failed to open flag file: %s", flagPath)
+	//}
+	//defer func(flagFile *os.File) {
+	//	err := flagFile.Close()
+	//	if err != nil {
+	//		panic(err)
+	//	}
+	//}(flagFile)
 	// 为flag文件创建一个watcher，当文件被创建时通知程序
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -155,7 +156,10 @@ func CallAsyncFuncAndWaitByFlag(flagPath, logPath string, funcAsync func() error
 			panic(err)
 		}
 	}(watcher)
-	if err = watcher.Add(flagPath); err != nil {
+	// 监听flag文件所在目录
+	dirPath := filepath.Dir(flagPath)
+	if err = watcher.Add(dirPath); err != nil {
+		fmt.Println(err.Error())
 		return nil, err
 	}
 
@@ -176,9 +180,14 @@ func CallAsyncFuncAndWaitByFlag(flagPath, logPath string, funcAsync func() error
 		select {
 		case event := <-watcher.Events:
 			if event.Op&fsnotify.Create == fsnotify.Create {
+				fmt.Printf("监听到 %s 被创建\n", event.Name)
+				// 检查被创建的文件是否为flag文件
+				if event.Name != flagPath {
+					continue
+				}
 				fmt.Printf("标志文件[%s]已创建\n", flagPath)
 				// 停止监听
-				if err = watcher.Remove(flagPath); err != nil {
+				if err = watcher.Remove(dirPath); err != nil {
 					return nil, err
 				}
 				// 读取日志文件
