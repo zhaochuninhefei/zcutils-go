@@ -102,6 +102,7 @@ func CallAsyncFuncAndWaitByLog(logPath string, funcAsync func() error, funcHandl
 		case line := <-t.Lines:
 			end, err := funcHandlerLogLine(line.Text)
 			if err != nil {
+				fmt.Printf("==== tail %s stop by error : %s ====\n", logPath, err.Error())
 				errStop := t.Stop()
 				if errStop != nil {
 					fmt.Println(errStop.Error())
@@ -109,6 +110,7 @@ func CallAsyncFuncAndWaitByLog(logPath string, funcAsync func() error, funcHandl
 				return err
 			}
 			if end {
+				fmt.Printf("==== tail %s finish. ====\n", logPath)
 				err = t.Stop()
 				if err != nil {
 					fmt.Println(err.Error())
