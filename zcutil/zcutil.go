@@ -1,9 +1,14 @@
 package zcutil
 
 import (
+	"context"
 	"encoding/binary"
+	"errors"
 	"fmt"
+	"gitee.com/zhaochuninhefei/zcutils-go/zcpath"
+	"github.com/nxadm/tail"
 	"runtime"
+	"time"
 )
 
 // Int32ToBytes 将int32值转为4个字节的byte数组
@@ -42,4 +47,68 @@ func If(condition bool, trueVal, falseVal interface{}) interface{} {
 		return trueVal
 	}
 	return falseVal
+}
+
+func CallAsyncFuncAndWaitByLog(logPath string, funcAsync func() error, funcHandlerLogLine func(line string) (bool, error), timeoutSeconds int) error {
+	// 检查funcAsync和funcHandlerLogLine是否为nil
+	if funcAsync == nil || funcHandlerLogLine == nil {
+		return errors.New("funcAsync和funcHandlerLogLine不能为nil")
+	}
+
+	// 删除日志文件
+	err := zcpath.RemoveFile(logPath)
+	if err != nil {
+		return err
+	}
+
+	// 执行funcAsync
+	err = funcAsync()
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("==== tail %s start ====", logPath)
+	// 配置超时Context, 默认90秒
+	// 如果timeoutSeconds<=0, 则使用默认值90秒
+	if timeoutSeconds <= 0 {
+		timeoutSeconds = 90
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeoutSeconds)*time.Second)
+	defer cancel()
+
+	// 读取日志文件
+	t, err := tail.TailFile(logPath, tail.Config{
+		Follow: true,
+		ReOpen: true,
+	})
+	if err != nil {
+		return err
+	}
+	for {
+		select {
+		case <-ctx.Done():
+			// 监听日志文件超时
+			err = t.Stop()
+			if err != nil {
+				fmt.Printf(err.Error())
+			}
+			return fmt.Errorf("tail %s.log timeout", logPath)
+		case line := <-t.Lines:
+			end, err := funcHandlerLogLine(line.Text)
+			if err != nil {
+				errStop := t.Stop()
+				if errStop != nil {
+					fmt.Println(errStop.Error())
+				}
+				return err
+			}
+			if end {
+				err = t.Stop()
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+				return nil
+			}
+		}
+	}
 }
