@@ -1,12 +1,15 @@
 package zcutil
 
 import (
+	"bufio"
 	"context"
 	"encoding/binary"
 	"errors"
 	"fmt"
 	"gitee.com/zhaochuninhefei/zcutils-go/zcpath"
+	"github.com/fsnotify/fsnotify"
 	"github.com/nxadm/tail"
+	"os"
 	"runtime"
 	"time"
 )
@@ -117,6 +120,101 @@ func CallAsyncFuncAndWaitByLog(logPath string, funcAsync func() error, funcHandl
 				}
 				return nil
 			}
+		}
+	}
+}
+
+func CallAsyncFuncAndWaitByFlag(flagPath, logPath string, funcAsync func() error, timeoutSeconds int) ([]string, error) {
+	// 删除标志文件与日志文件
+	if err := zcpath.RemoveFile(flagPath); err != nil {
+		return nil, err
+	}
+	if err := zcpath.RemoveFile(logPath); err != nil {
+		return nil, err
+	}
+
+	// 监听标志文件
+	flagFile, err := os.Open(flagPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open flag file: %s", flagPath)
+	}
+	defer func(flagFile *os.File) {
+		err := flagFile.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(flagFile)
+	// 为flag文件创建一个watcher，当文件被创建时通知程序
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create watcher: %s", err.Error())
+	}
+	defer func(watcher *fsnotify.Watcher) {
+		err := watcher.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(watcher)
+	if err = watcher.Add(flagPath); err != nil {
+		return nil, err
+	}
+
+	// 调用异步函数
+	if err = funcAsync(); err != nil {
+		return nil, err
+	}
+
+	// 配置超时Context, 默认90秒
+	// 如果timeoutSeconds<=0, 则使用默认值90秒
+	if timeoutSeconds <= 0 {
+		timeoutSeconds = 90
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeoutSeconds)*time.Second)
+	defer cancel()
+
+	for {
+		select {
+		case event := <-watcher.Events:
+			if event.Op&fsnotify.Create == fsnotify.Create {
+				fmt.Printf("标志文件[%s]已创建\n", flagPath)
+				// 停止监听
+				if err = watcher.Remove(flagPath); err != nil {
+					return nil, err
+				}
+				// 读取日志文件
+				logFile, err := os.Open(logPath)
+				if err != nil {
+					return nil, fmt.Errorf("打开日志文件[%s]失败: %s", logPath, err.Error())
+				}
+				//goland:noinspection GoDeferInLoop
+				defer func(logFile *os.File) {
+					err := logFile.Close()
+					if err != nil {
+						fmt.Printf("关闭日志文件[%s]失败: %s\n", flagPath, err.Error())
+					}
+				}(logFile)
+				scanner := bufio.NewScanner(logFile)
+				var logs []string
+				for scanner.Scan() {
+					logs = append(logs, scanner.Text())
+				}
+				if err = scanner.Err(); err != nil {
+					return nil, fmt.Errorf("读取日志文件[%s]失败: %s", logPath, err.Error())
+				}
+				return logs, nil
+			}
+		case err := <-watcher.Errors:
+			errMsg := fmt.Sprintf("监听标志文件[%s]发生错误: %s", flagPath, err.Error())
+			fmt.Println(errMsg)
+			return nil, errors.New(errMsg)
+		case <-ctx.Done():
+			errMsg := fmt.Sprintf("监听标志文件[%s]超时", flagPath)
+			fmt.Println(errMsg)
+			// 停止监听
+			if err = watcher.Remove(flagPath); err != nil {
+				return nil, err
+			}
+			return nil, errors.New(errMsg)
 		}
 	}
 }
