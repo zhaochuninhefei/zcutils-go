@@ -49,6 +49,12 @@ func If(condition bool, trueVal, falseVal interface{}) interface{} {
 	return falseVal
 }
 
+// CallAsyncFuncAndWaitByLog 调用异步函数并根据日志处理函数等待结束
+//  - logPath 用于监听异步函数是否执行结束的日志文件,会在调用异步函数funcAsync之前删除
+//  - funcAsync 异步函数,注意CallAsyncFuncAndWaitByLog内部会在删除日志文件后直接以同步方式调用该函数.即funcAsync的异步处理是由其内部完成的.
+//  - funcHandlerLogLine 日志按行处理函数,该函数以一行日志为入参,根据该函数的返回值确定是否结束等待.返回bool为true时则结束等待,返回error非空时结束等待并返回该error.
+//  - timeoutSeconds 等待的超时秒数,超过该时间则立即结束等待并返回超时错误.
+// 该函数内部会先删除logPath文件,然后执行funcAsync,然后tail监听logPath文件,将获取到的每一行日志作为入参调用funcHandlerLogLine进行判断,根据结果决定是否继续tail.如果超时则直接返回超时错误.
 func CallAsyncFuncAndWaitByLog(logPath string, funcAsync func() error, funcHandlerLogLine func(line string) (bool, error), timeoutSeconds int) error {
 	// 检查funcAsync和funcHandlerLogLine是否为nil
 	if funcAsync == nil || funcHandlerLogLine == nil {
