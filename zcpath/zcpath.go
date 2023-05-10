@@ -30,7 +30,7 @@ func CreateDir(path string) (bool, error) {
 //  该函数会删除目录下的所有文件和子目录, 但是不会删除目录本身
 func ClearDir(dir string) error {
 	// 先判断dir是否存在, 如果不存在, 则创建
-	if _, err := os.Stat(dir); err != nil {
+	if dirInfo, err := os.Stat(dir); err != nil || !dirInfo.IsDir() {
 		err1 := os.MkdirAll(dir, 0755)
 		if err1 != nil {
 			return err1
