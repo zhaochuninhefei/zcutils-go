@@ -306,6 +306,17 @@ func FileCopyFromDirToDir(srcDir string, dstDir string) error {
 	return nil
 }
 
+// DirCopy 拷贝目录
+//  例如: DirCopy("/x/y/z", "/a/b/c") 效果: 将子目录z拷贝到目标目录/a/b/c下面，即"/a/b/c/z"
+func DirCopy(src string, dst string) error {
+	// 获取源目录名
+	srcDirName := filepath.Base(src)
+	// 拼接目标目录路径
+	dstDirPath := filepath.Join(dst, srcDirName)
+	// 拷贝源目录下所有文件到目标目录，包括子目录及子目录下的文件
+	return FileCopyFromDirToDir(src, dstDirPath)
+}
+
 type FileFilterCondition struct {
 	FileNamePrefix string // 文件名前缀
 	FileNameSuffix string // 文件名后缀

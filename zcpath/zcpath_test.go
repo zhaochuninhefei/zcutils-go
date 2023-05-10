@@ -3,6 +3,7 @@ package zcpath
 import (
 	"fmt"
 	"os"
+	"path"
 	"testing"
 )
 
@@ -386,5 +387,79 @@ func TestFileCopyFromDirToDir(t *testing.T) {
 	err = os.RemoveAll("testdata/dstDir")
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestDirCopy(t *testing.T) {
+	type args struct {
+		src string
+		dst string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "test1",
+			args: args{
+				src: "testdata/srcDir",
+				dst: "testdata/dstDir",
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// 创建测试目录
+			ok, err := CreateDir(tt.args.src)
+			if !ok && err != nil {
+				t.Fatal(err)
+			}
+			// 创建测试文件 testfile1
+			err = CreateFile(path.Join(tt.args.src, "testfile1.txt"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			// 创建测试子目录 subdir1
+			ok, err = CreateDir(path.Join(tt.args.src, "subdir1"))
+			if !ok && err != nil {
+				t.Fatal(err)
+			}
+			// 创建测试文件 subdir1/testfile2
+			err = CreateFile(path.Join(tt.args.src, "subdir1", "testfile2.txt"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			// 打印测试目录
+			fmt.Println("测试目录:")
+			err = PrintDirTree(tt.args.src, -1, false, true)
+			if err != nil {
+				t.Fatal(err)
+			}
+			fmt.Println("目标目录:")
+			err = PrintDirTree(tt.args.dst, -1, false, true)
+			if err != nil {
+				fmt.Println(err.Error())
+			} else {
+				t.Fatal("目标目录此时不应该存在!")
+			}
+			if err := DirCopy(tt.args.src, tt.args.dst); (err != nil) != tt.wantErr {
+				t.Errorf("DirCopy() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			// 检查目标目录
+			fmt.Println("目标目录(测试后):")
+			err = PrintDirTree(tt.args.dst, -1, false, true)
+			if err != nil {
+				t.Fatal(err)
+			}
+			// 删除测试目录与目标目录
+			if err = os.RemoveAll(tt.args.src); err != nil {
+				t.Fatal(err)
+			}
+			if err = os.RemoveAll(tt.args.dst); err != nil {
+				t.Fatal(err)
+			}
+		})
 	}
 }
