@@ -162,7 +162,7 @@ func TestCallAsyncFuncAndWaitByLog(t *testing.T) {
 	if err == nil {
 		t.Fatal("未能返回错误")
 	} else {
-		if err.Error() == "[err]发生错误" {
+		if err.Error() == "[funcHandlerLogLine error]处理日志行返回错误: [err]发生错误" {
 			fmt.Printf("成功获取错误消息: %s", err.Error())
 		} else {
 			t.Fatal("错误消息与预期不符: " + err.Error())
@@ -193,7 +193,7 @@ func TestCallAsyncFuncAndWaitByLog(t *testing.T) {
 	if err == nil {
 		t.Fatal("未能返回错误")
 	} else {
-		if strings.HasSuffix(err.Error(), "timeout") {
+		if strings.HasPrefix(err.Error(), "[tail timeout]") {
 			fmt.Printf("成功获取超时错误消息: %s\n", err.Error())
 		} else {
 			t.Fatal("错误消息与预期不符: " + err.Error())
@@ -241,7 +241,7 @@ func TestCallAsyncFuncAndWaitByFlag(t *testing.T) {
 	if err == nil {
 		t.Fatal("未能返回错误")
 	} else {
-		if strings.HasSuffix(err.Error(), "timeout") {
+		if strings.HasPrefix(err.Error(), "[watcher timeout]") {
 			fmt.Printf("成功获取超时错误消息: %s\n", err.Error())
 		} else {
 			t.Fatal("错误消息与预期不符: " + err.Error())

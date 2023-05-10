@@ -208,8 +208,8 @@ func CallAsyncFuncAndWaitByFlag(flagPath, logPath string, funcAsync func() error
 			errMsg := fmt.Sprintf("[watcher timeout]监听标志文件[%s]超时", flagPath)
 			fmt.Println(errMsg)
 			// 停止监听
-			if err = watcher.Remove(flagPath); err != nil {
-				return nil, err
+			if err = watcher.Remove(dirPath); err != nil {
+				fmt.Printf("[watcher error]移除监听目录[%s]失败: %s\n", dirPath, err.Error())
 			}
 			return nil, errors.New(errMsg)
 		}
