@@ -62,19 +62,19 @@ func If(condition bool, trueVal, falseVal interface{}) interface{} {
 func CallAsyncFuncAndWaitByLog(logPath string, funcAsync func() error, funcHandlerLogLine func(line string) (bool, error), timeoutSeconds int) error {
 	// 检查funcAsync和funcHandlerLogLine是否为nil
 	if funcAsync == nil || funcHandlerLogLine == nil {
-		return errors.New("funcAsync和funcHandlerLogLine不能为nil")
+		return errors.New("[params error]funcAsync和funcHandlerLogLine不能为nil")
 	}
 
 	// 删除日志文件
 	err := zcpath.RemoveFile(logPath)
 	if err != nil {
-		return err
+		return fmt.Errorf("[logfile error]删除日志文件失败: %s", err.Error())
 	}
 
 	// 执行funcAsync
 	err = funcAsync()
 	if err != nil {
-		return err
+		return fmt.Errorf("[funcAsync error]执行异步函数失败: %s", err.Error())
 	}
 
 	fmt.Printf("==== tail %s start ====\n", logPath)
@@ -92,7 +92,7 @@ func CallAsyncFuncAndWaitByLog(logPath string, funcAsync func() error, funcHandl
 		ReOpen: true,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("[tail error]监听日志文件失败: %s", err.Error())
 	}
 	for {
 		select {
@@ -102,7 +102,7 @@ func CallAsyncFuncAndWaitByLog(logPath string, funcAsync func() error, funcHandl
 			if err != nil {
 				fmt.Printf(err.Error())
 			}
-			return fmt.Errorf("tail %s.log timeout", logPath)
+			return fmt.Errorf("[tail timeout]监听 %s.log 超时", logPath)
 		case line := <-t.Lines:
 			end, err := funcHandlerLogLine(line.Text)
 			if err != nil {
@@ -111,7 +111,7 @@ func CallAsyncFuncAndWaitByLog(logPath string, funcAsync func() error, funcHandl
 				if errStop != nil {
 					fmt.Println(errStop.Error())
 				}
-				return err
+				return fmt.Errorf("[funcHandlerLogLine error]处理日志行返回错误: %s", err.Error())
 			}
 			if end {
 				fmt.Printf("==== tail %s finish. ====\n", logPath)
@@ -128,44 +128,32 @@ func CallAsyncFuncAndWaitByLog(logPath string, funcAsync func() error, funcHandl
 func CallAsyncFuncAndWaitByFlag(flagPath, logPath string, funcAsync func() error, timeoutSeconds int) ([]string, error) {
 	// 删除标志文件与日志文件
 	if err := zcpath.RemoveFile(flagPath); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[flagfile error]删除标志文件失败: %s", err.Error())
 	}
 	if err := zcpath.RemoveFile(logPath); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[logfile error]删除日志文件失败: %s", err.Error())
 	}
 
-	//// 监听标志文件
-	//flagFile, err := os.Open(flagPath)
-	//if err != nil {
-	//	return nil, fmt.Errorf("failed to open flag file: %s", flagPath)
-	//}
-	//defer func(flagFile *os.File) {
-	//	err := flagFile.Close()
-	//	if err != nil {
-	//		panic(err)
-	//	}
-	//}(flagFile)
-	// 为flag文件创建一个watcher，当文件被创建时通知程序
+	// 创建监听器
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		return nil, fmt.Errorf("failed to create watcher: %s", err.Error())
+		return nil, fmt.Errorf("[watcher error]创建监听失败: %s", err.Error())
 	}
 	defer func(watcher *fsnotify.Watcher) {
 		err := watcher.Close()
 		if err != nil {
-			panic(err)
+			fmt.Printf("[watcher error]关闭监听失败: %s", err.Error())
 		}
 	}(watcher)
 	// 监听flag文件所在目录
 	dirPath := filepath.Dir(flagPath)
 	if err = watcher.Add(dirPath); err != nil {
-		fmt.Println(err.Error())
-		return nil, err
+		return nil, fmt.Errorf("[watcher error]添加监听目录失败: %s", err.Error())
 	}
 
 	// 调用异步函数
 	if err = funcAsync(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[funcAsync error]调用异步函数失败: %s", err.Error())
 	}
 
 	// 配置超时Context, 默认90秒
@@ -188,12 +176,12 @@ func CallAsyncFuncAndWaitByFlag(flagPath, logPath string, funcAsync func() error
 				fmt.Printf("标志文件[%s]已创建\n", flagPath)
 				// 停止监听
 				if err = watcher.Remove(dirPath); err != nil {
-					return nil, err
+					return nil, fmt.Errorf("[watcher error]移除监听目录[%s]失败: %s", dirPath, err.Error())
 				}
 				// 读取日志文件
 				logFile, err := os.Open(logPath)
 				if err != nil {
-					return nil, fmt.Errorf("打开日志文件[%s]失败: %s", logPath, err.Error())
+					return nil, fmt.Errorf("[logfile error]打开日志文件[%s]失败: %s", logPath, err.Error())
 				}
 				//goland:noinspection GoDeferInLoop
 				defer func(logFile *os.File) {
@@ -208,16 +196,16 @@ func CallAsyncFuncAndWaitByFlag(flagPath, logPath string, funcAsync func() error
 					logs = append(logs, scanner.Text())
 				}
 				if err = scanner.Err(); err != nil {
-					return nil, fmt.Errorf("读取日志文件[%s]失败: %s", logPath, err.Error())
+					return nil, fmt.Errorf("[logfile error]读取日志文件[%s]失败: %s", logPath, err.Error())
 				}
 				return logs, nil
 			}
 		case err := <-watcher.Errors:
-			errMsg := fmt.Sprintf("监听标志文件[%s]发生错误: %s", flagPath, err.Error())
+			errMsg := fmt.Sprintf("[watcher error]监听标志文件[%s]发生错误: %s", flagPath, err.Error())
 			fmt.Println(errMsg)
 			return nil, errors.New(errMsg)
 		case <-ctx.Done():
-			errMsg := fmt.Sprintf("监听标志文件[%s]超时", flagPath)
+			errMsg := fmt.Sprintf("[watcher timeout]监听标志文件[%s]超时", flagPath)
 			fmt.Println(errMsg)
 			// 停止监听
 			if err = watcher.Remove(flagPath); err != nil {

@@ -225,6 +225,28 @@ func TestCallAsyncFuncAndWaitByFlag(t *testing.T) {
 	if len(lines) != 10 {
 		t.Fatal("未能读取到所有日志")
 	}
+
+	// 测试超时
+	lines, err = CallAsyncFuncAndWaitByFlag(flagFilePath, logFilePath, func() error {
+		fmt.Println("aysnc func start...")
+		// goruntine 执行日志写入
+		go func() {
+			for i := 0; i < 10; i++ {
+				// 向logFilePath写入日志
+				_ = writeLog(logFilePath, fmt.Sprintf("test log %d", i))
+			}
+		}()
+		return nil
+	}, 3)
+	if err == nil {
+		t.Fatal("未能返回错误")
+	} else {
+		if strings.HasSuffix(err.Error(), "timeout") {
+			fmt.Printf("成功获取超时错误消息: %s\n", err.Error())
+		} else {
+			t.Fatal("错误消息与预期不符: " + err.Error())
+		}
+	}
 }
 
 // writeLog 向日志文件logPath追加写入line并换行,如果日志文件不存在就创建新文件
