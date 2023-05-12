@@ -463,3 +463,54 @@ func TestDirCopy(t *testing.T) {
 		})
 	}
 }
+
+func TestReadFileToLinesAndAll(t *testing.T) {
+	// 写入测试数据
+	err := writeFile("testdata/testfile.txt", []byte("line1\nline2\nline3\nline4\nline5"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 读取文件
+	lines, all, err := ReadFileToLinesAndAll("testdata/testfile.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 打印lines
+	fmt.Println("按行读取结果:")
+	for _, line := range lines {
+		fmt.Println(line)
+	}
+	// 打印all
+	fmt.Println("全部读取结果:")
+	fmt.Println(all)
+	// 检查读取结果
+	if len(lines) != 5 {
+		t.Fatal("按行读取错误!")
+	}
+	if all != "line1\nline2\nline3\nline4\nline5" {
+		t.Fatal("全部读取错误!")
+	}
+	// 删除测试文件
+	err = os.Remove("testdata/testfile.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func writeFile(filePath string, bytesContent []byte) error {
+	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+	if err != nil {
+		return err
+	}
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(file)
+	_, err = file.Write(bytesContent)
+	if err != nil {
+		return err
+	}
+	return nil
+}

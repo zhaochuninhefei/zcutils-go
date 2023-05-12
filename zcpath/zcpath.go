@@ -378,3 +378,17 @@ func ChmodDir(dir string, mode os.FileMode) error {
 	}
 	return nil
 }
+
+// ReadFileToLinesAndAll 从filePath读取文件内容，返回每一行的内容和所有内容
+func ReadFileToLinesAndAll(filePath string) ([]string, string, error) {
+	// 读取文件内容
+	fileBytes, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return nil, "", err
+	}
+	// 将文件内容转换为字符串
+	fileContent := string(fileBytes)
+	// 将文件内容按行存储到字符串切片中
+	lines := strings.Split(fileContent, "\n")
+	return lines, fileContent, nil
+}
