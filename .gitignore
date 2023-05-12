@@ -19,3 +19,4 @@ go.sum
 zctoken/testdata/*
 zcpath/testdata/*
 zcutil/testdata/*
+/zccompress/testdata/
