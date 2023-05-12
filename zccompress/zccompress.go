@@ -9,6 +9,21 @@ import (
 	"path/filepath"
 )
 
+// CompressDirToTargz 压缩目录到tar.gz文件
+//  例如: CompressDirToTargz("testdata/testDir", "testdata/XXX.tar.gz")
+//  会将testDir目录完整压缩到testdata/XXX.tar.gz文件中, 且压缩文件中的目录结构根目录为testDir，与testDir目录结构一致。
+//  如果testDir目录结构如下:
+//  testDir
+//  ├── subdir1
+//  │   └── testFile1.txt
+//  ├── subdir2
+//  └── testFile.txt
+//  则压缩文件中的目录结构为:
+//  testDir
+//  ├── subdir1
+//  │   └── testFile1.txt
+//  ├── subdir2
+//  └── testFile.txt
 func CompressDirToTargz(dirPath, targetTarGzPath string) error {
 	tarFile, err := os.Create(targetTarGzPath)
 	if err != nil {
@@ -82,6 +97,22 @@ func CompressDirToTargz(dirPath, targetTarGzPath string) error {
 	return nil
 }
 
+// UnCompressTargzToDir 解压tar.gz文件到目录
+//  例如: UnCompressTargzToDir("testdata/XXX.tar.gz", "testdata/YYY")
+//  会将XXX.tar.gz文件完整解压到testdata/YYY目录中。
+//  如果XXX.tar.gz文件中的目录结构为:
+//  testDir
+//  ├── subdir1
+//  │   └── testFile1.txt
+//  ├── subdir2
+//  └── testFile.txt
+//  则解压后的目录结构为:
+//  YYY
+//  └── testDir
+//      ├── subdir1
+//      │   └── testFile1.txt
+//      ├── subdir2
+//      └── testFile.txt
 func UnCompressTargzToDir(sourceTarGzPath, dirPath string) error {
 	sourceTarGz, err := os.Open(sourceTarGzPath)
 	if err != nil {
