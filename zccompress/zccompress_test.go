@@ -55,6 +55,16 @@ func TestCompressDirToTargz(t *testing.T) {
 		t.Fatal("压缩文件不存在")
 	}
 
+	// 测试重复CompressDirToTargz
+	err = CompressDirToTargz("testdata/testDir", "testdata/XXX.tar.gz")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 检查压缩文件是否存在
+	if isFile, err := zcpath.FileExists("testdata/XXX.tar.gz"); !isFile || err != nil {
+		t.Fatal("压缩文件不存在")
+	}
+
 	// 测试UnCompressTargzToDir
 	err = UnCompressTargzToDir("testdata/XXX.tar.gz", "testdata/YYY")
 	if err != nil {
@@ -62,6 +72,18 @@ func TestCompressDirToTargz(t *testing.T) {
 	}
 	// 打印解压缩后的目录结构
 	fmt.Println("解压缩后的目录结构如下:")
+	err = zcpath.PrintDirTree("testdata/YYY", -1, false, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 测试重复解压缩
+	err = UnCompressTargzToDir("testdata/XXX.tar.gz", "testdata/YYY")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 打印解压缩后的目录结构
+	fmt.Println("重复解压缩后的目录结构如下:")
 	err = zcpath.PrintDirTree("testdata/YYY", -1, false, true)
 	if err != nil {
 		t.Fatal(err)
