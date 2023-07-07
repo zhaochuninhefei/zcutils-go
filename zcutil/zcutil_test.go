@@ -107,6 +107,28 @@ func TestIf(t *testing.T) {
 	}
 }
 
+func TestIfByFunc(t *testing.T) {
+	val, err := IfByFunc(func() bool {
+		return true
+	}, func() (interface{}, error) {
+		return 1, nil
+	}, func() (interface{}, error) {
+		return 0, nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(val)
+
+	fmt.Println(IfByFuncNoErr(func() bool {
+		return false
+	}, func() interface{} {
+		return 1
+	}, func() interface{} {
+		return 0
+	}))
+}
+
 func TestCallAsyncFuncAndWaitByLog(t *testing.T) {
 	// 日志文件路径
 	logFilePath := "testdata/test.log"

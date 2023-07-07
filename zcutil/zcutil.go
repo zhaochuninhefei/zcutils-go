@@ -53,6 +53,27 @@ func If(condition bool, trueVal, falseVal interface{}) interface{} {
 	return falseVal
 }
 
+type IfCondition func() bool
+type IfTrueVal func() (interface{}, error)
+type IfFalseVal func() (interface{}, error)
+
+func IfByFunc(condition IfCondition, trueVal IfTrueVal, falseVal IfFalseVal) (interface{}, error) {
+	if condition() {
+		return trueVal()
+	}
+	return falseVal()
+}
+
+type IfTrueValNoError func() interface{}
+type IfFalseValNoError func() interface{}
+
+func IfByFuncNoErr(condition IfCondition, trueVal IfTrueValNoError, falseVal IfFalseValNoError) interface{} {
+	if condition() {
+		return trueVal()
+	}
+	return falseVal()
+}
+
 // CallAsyncFuncAndWaitByLog 调用异步函数并根据日志处理函数等待结束
 //  - logPath 用于监听异步函数是否执行结束的日志文件,会在调用异步函数funcAsync之前删除
 //  - funcAsync 异步函数,注意CallAsyncFuncAndWaitByLog内部会在删除日志文件后直接以同步方式调用该函数.即funcAsync的异步处理是由其内部完成的.
