@@ -109,6 +109,24 @@ func RemoveFile(filePath string) error {
 	}
 }
 
+// RemoveFileWithWildcard 根据带通配符的文件路径删除文件
+//  - filePath: 要删除的文件path, 如"/a/b/*.txt"
+func RemoveFileWithWildcard(filePath string) error {
+	// 使用通配符查找匹配的文件
+	matches, err := filepath.Glob(filePath)
+	if err != nil {
+		return fmt.Errorf("无法匹配文件:[%s], 发生错误: %s", filePath, err)
+	}
+	// 遍历匹配的文件
+	for _, match := range matches {
+		err = RemoveFile(match)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // PrintDirTree 打印目录树
 //  @param root 根目录
 //  @param level 打印层级, 0只打印根目录自身，1表示打印一层(根目录下的文件与目录), 2表示打印两层, 依次类推。-1表示打印所有层级。

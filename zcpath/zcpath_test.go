@@ -359,6 +359,39 @@ func TestRemoveFile(t *testing.T) {
 	} else {
 		fmt.Println("文件不存在")
 	}
+
+	// 创建测试子目录 testdata/subdir0
+	ok, err := CreateDir("testdata/subdir0")
+	if !ok && err != nil {
+		t.Fatal(err)
+	}
+	// 创建测试文件 testdata/subdir0/testfile1.txt
+	err = CreateFile("testdata/subdir0/testfile1.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 判断文件是否存在
+	exists, err = FileExists("testdata/subdir0/testfile1.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !exists {
+		t.Fatal("文件不存在")
+	} else {
+		fmt.Println("文件存在")
+	}
+	// 删除文件
+	err = RemoveFileWithWildcard("testdata/subdir0/*.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 判断文件是否存在
+	exists, err = FileExists("testdata/subdir0/testfile1.txt")
+	if exists {
+		t.Fatal("文件存在")
+	} else {
+		fmt.Println("文件不存在")
+	}
 }
 
 func TestFileCopyFromDirToDir(t *testing.T) {
