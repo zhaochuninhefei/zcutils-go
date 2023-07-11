@@ -306,6 +306,27 @@ func FileCopyFromDirToDir(srcDir string, dstDir string) error {
 	return nil
 }
 
+// FileWithWildcardCopyToDir 将含有通配符的文件路径指向的文件拷贝到目标目录下
+//  - sourcePath: 含有通配符(*)的文件路径，如: /a/b/*.txt
+//  - dstDir: 目标目录，如: /c/d
+//
+// 效果类似: cp /a/b/*.txt /c/d
+func FileWithWildcardCopyToDir(sourcePath string, dstDir string) error {
+	// 使用通配符查找匹配的文件
+	matches, err := filepath.Glob(sourcePath)
+	if err != nil {
+		return fmt.Errorf("无法匹配文件:[%s], 发生错误: %s", sourcePath, err)
+	}
+	// 遍历匹配的文件
+	for _, match := range matches {
+		err = FileCopyToDir(match, dstDir)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // DirCopy 拷贝目录
 //  例如: DirCopy("/x/y/z", "/a/b/c") 效果: 将子目录z拷贝到目标目录/a/b/c下面，即"/a/b/c/z"
 func DirCopy(src string, dst string) error {

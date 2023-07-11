@@ -190,8 +190,21 @@ func TestFileCopyToDir(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	err = FileWithWildcardCopyToDir("testdata/*.txt", "testdata/subdir1/subdir12")
+	if err != nil {
+		t.Fatal(err)
+	}
 	// 判断文件是否存在
 	exists, err := FileExists("testdata/subdir1/subdir11/testfile.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !exists {
+		t.Fatal("文件不存在")
+	} else {
+		fmt.Println("文件存在")
+	}
+	exists, err = FileExists("testdata/subdir1/subdir12/testfile.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -207,6 +220,10 @@ func TestFileCopyToDir(t *testing.T) {
 	}
 	// 删除测试文件
 	err = os.Remove("testdata/subdir1/subdir11/testfile.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = os.Remove("testdata/subdir1/subdir12/testfile.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
