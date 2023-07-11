@@ -185,12 +185,20 @@ func TestFileCopyToDir(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	success, err := CreateDir("testdata/subdir0")
+	if !success {
+		t.Fatal(err)
+	}
+	err = CreateFile("testdata/subdir0/testfile1.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
 	// 复制文件
 	err = FileCopyToDir("testdata/testfile.txt", "testdata/subdir1/subdir11")
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = FileWithWildcardCopyToDir("testdata/*.txt", "testdata/subdir1/subdir12")
+	err = FileWithWildcardCopyToDir("testdata/*/*.txt", "testdata/subdir1/subdir12")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -204,7 +212,7 @@ func TestFileCopyToDir(t *testing.T) {
 	} else {
 		fmt.Println("文件存在")
 	}
-	exists, err = FileExists("testdata/subdir1/subdir12/testfile.txt")
+	exists, err = FileExists("testdata/subdir1/subdir12/testfile1.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -218,12 +226,15 @@ func TestFileCopyToDir(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// 删除测试文件
+	err = os.Remove("testdata/subdir0/testfile1.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
 	err = os.Remove("testdata/subdir1/subdir11/testfile.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = os.Remove("testdata/subdir1/subdir12/testfile.txt")
+	err = os.Remove("testdata/subdir1/subdir12/testfile1.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
