@@ -1,0 +1,46 @@
+package zcssh
+
+import (
+	"fmt"
+	"testing"
+)
+
+func Test_executeCommand(t *testing.T) {
+	type args struct {
+		user     string
+		password string
+		host     string
+		port     string
+		command  string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+		{
+			name: "test1",
+			args: args{
+				user:     "zhaochun",
+				password: "asdfzxcv123",
+				host:     "localhost",
+				port:     "22",
+				command:  "ls",
+			},
+			want:    "",
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := executeCommand(tt.args.user, tt.args.password, tt.args.host, tt.args.port, tt.args.command)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("executeCommand() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			fmt.Printf("远程执行结果:\n%s", got)
+		})
+	}
+}
