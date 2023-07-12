@@ -1,9 +1,11 @@
 package zcssh
 
 import (
+	"bytes"
 	"fmt"
 	"golang.org/x/crypto/ssh"
 	"io"
+	"strings"
 )
 
 func executeCommand(user, password, host, port, command string) (string, error) {
@@ -91,14 +93,101 @@ func executeCommands(user, password, host, port string, commands []string) ([]st
 		}
 	}(session)
 
+	// 拼接命令
+	command := strings.Join(commands, fmt.Sprintf(" && echo %s && ", cmdSeprator))
+
 	// 执行命令
-	var results []string
-	for _, command := range commands {
-		output, err := session.CombinedOutput(command)
-		if err != nil {
-			return nil, fmt.Errorf("failed to execute command: %v", err)
-		}
-		results = append(results, string(output))
+	output, err := session.CombinedOutput(command)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute command: %v", err)
 	}
-	return results, nil
+	// 将output转为string
+	outputStr := strings.TrimSpace(string(output))
+	fmt.Println(outputStr)
+	// 使用cmdSeprator对outputStr做分割,得到一个切片
+	outputStrs := strings.Split(outputStr, cmdSeprator+"\n")
+
+	return outputStrs, nil
+}
+
+const cmdSeprator = "=====Command Done====="
+
+// RemoteRun runs multiple commands on the same session and returns the results as a slice of strings
+func RemoteRun(host, port, user, password string, commands []string) ([]string, error) {
+	// Create a new SSH client
+	config := &ssh.ClientConfig{
+		User: user,
+		Auth: []ssh.AuthMethod{
+			ssh.Password(password),
+		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(), // ignore host key verification for simplicity
+	}
+	client, err := ssh.Dial("tcp", host+":"+port, config)
+	if err != nil {
+		return nil, err
+	}
+
+	session, err := client.NewSession()
+	if err != nil {
+		return nil, err
+	}
+	defer session.Close()
+
+	// Create a buffer to store the output
+	var output bytes.Buffer
+
+	// Set IO
+	session.Stdout = &output
+	session.Stderr = &output
+
+	// Get the stdin pipe
+	stdin, err := session.StdinPipe()
+	if err != nil {
+		return nil, err
+	}
+
+	// Start remote shell
+	err = session.Shell()
+	if err != nil {
+		return nil, err
+	}
+
+	// Send the commands
+	for i, cmd := range commands {
+		_, err = fmt.Fprintf(stdin, "%s\n", cmd)
+		if err != nil {
+			return nil, err
+		}
+		if i < len(commands)-1 {
+			_, err = fmt.Fprintf(stdin, "echo %s\n", cmdSeprator)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	// Close the stdin pipe to send EOF signal to the session
+	stdin.Close()
+
+	// Wait for session to finish
+	err = session.Wait()
+	if err != nil {
+		return nil, err
+	}
+
+	// 将output转为string
+	outputStr := strings.TrimSpace(output.String())
+	// 使用cmdSeprator对outputStr做分割,得到一个切片
+	outputStrs := strings.Split(outputStr, "\n"+cmdSeprator+"\n")
+
+	//// Split the output by newline and return as a slice of strings
+	//results := bytes.Split(output.Bytes(), []byte("\n"))
+	//
+	//// Convert each byte slice to a string
+	//var resultsStr []string
+	//for _, result := range results {
+	//	resultsStr = append(resultsStr, string(result))
+	//}
+
+	return outputStrs, nil
 }
