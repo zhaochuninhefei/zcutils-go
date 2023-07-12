@@ -27,7 +27,7 @@ func Test_executeCommand(t *testing.T) {
 				password: "asdfzxcv123",
 				host:     "localhost",
 				port:     "22",
-				command:  "test",
+				command:  "free",
 			},
 			want:    "",
 			wantErr: false,
@@ -35,7 +35,7 @@ func Test_executeCommand(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := executeCommand(tt.args.user, tt.args.password, tt.args.host, tt.args.port, tt.args.command)
+			got, err := ExecuteCommand(tt.args.user, tt.args.password, tt.args.host, tt.args.port, tt.args.command)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("executeCommand() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -74,7 +74,7 @@ func Test_executeCommands(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := executeCommands(tt.args.user, tt.args.password, tt.args.host, tt.args.port, tt.args.commands)
+			got, err := ExecuteCommands(tt.args.user, tt.args.password, tt.args.host, tt.args.port, tt.args.commands)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("executeCommands() error = %v, wantErr %v", err, tt.wantErr)

@@ -7,7 +7,9 @@ import (
 	"strings"
 )
 
-func executeCommand(user, password, host, port, command string) (string, error) {
+// ExecuteCommand ssh连接目标服务器并远程执行命令
+//  如果命令执行失败会返回错误
+func ExecuteCommand(user, password, host, port, command string) (string, error) {
 	// SSH客户端配置
 	config := &ssh.ClientConfig{
 		User: user,
@@ -54,7 +56,9 @@ func executeCommand(user, password, host, port, command string) (string, error) 
 	return string(output), nil
 }
 
-func executeCommands(user, password, host, port string, commands []string) ([]string, error) {
+// ExecuteCommands ssh连接目标服务器并远程执行多条命令
+//  最后一条命令执行失败会返回错误，其他命令即使失败也不会影响后续命令的执行
+func ExecuteCommands(user, password, host, port string, commands []string) ([]string, error) {
 	// SSH客户端配置
 	config := &ssh.ClientConfig{
 		User: user,
