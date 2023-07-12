@@ -24,7 +24,7 @@ func Test_executeCommand(t *testing.T) {
 			name: "test1",
 			args: args{
 				user:     "zhaochun",
-				password: "asdfzxcv123",
+				password: "password",
 				host:     "localhost",
 				port:     "22",
 				command:  "free",
@@ -63,7 +63,7 @@ func Test_executeCommands(t *testing.T) {
 			name: "test1",
 			args: args{
 				user:     "zhaochun",
-				password: "asdfzxcv123",
+				password: "password",
 				host:     "localhost",
 				port:     "22",
 				commands: []string{"free", "cat /asdfasdfasdf", "id", "pwd"},
