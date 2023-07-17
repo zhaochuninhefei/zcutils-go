@@ -1,7 +1,9 @@
 package zcpath
 
 import (
+	"bufio"
 	"fmt"
+	"gitee.com/zhaochuninhefei/zcgolog/zclog"
 	"io"
 	"io/ioutil"
 	"os"
@@ -419,6 +421,7 @@ func ChmodDir(dir string, mode os.FileMode) error {
 }
 
 // ReadFileToLinesAndAll 从filePath读取文件内容，返回每一行的内容和所有内容
+//  使用ioutil.ReadFile一次性读取文件全部字节，建议只在读取小文件(<1MB)时使用该函数。
 func ReadFileToLinesAndAll(filePath string) ([]string, string, error) {
 	// 读取文件内容
 	fileBytes, err := ioutil.ReadFile(filePath)
@@ -430,4 +433,47 @@ func ReadFileToLinesAndAll(filePath string) ([]string, string, error) {
 	// 将文件内容按行存储到字符串切片中
 	lines := strings.Split(fileContent, "\n")
 	return lines, fileContent, nil
+}
+
+// 大文件阈值
+const maxFileSize = 1 << 20 // 1MB
+
+// ReadFileToLinesBySize 根据文件大小读取行
+//  当文件大小不足1MB时，整个读入内存;
+//  当文件大小达到或超过1MB时，按行读取，注意每行token数量不能超过65536.
+func ReadFileToLinesBySize(filename string) ([]string, error) {
+	// 获取文件信息
+	fi, err := os.Stat(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	// 根据大小选择读取方式
+	var lines []string
+	if fi.Size() < maxFileSize {
+		zclog.Debugf("按小文件读取, size: %d", fi.Size())
+		// 小文件,直接读取到内存
+		content, err := ioutil.ReadFile(filename)
+		if err != nil {
+			return nil, err
+		}
+		lines = strings.Split(string(content), "\n")
+	} else {
+		zclog.Debugf("按大文件读取, size: %d", fi.Size())
+		// 大文件,流式读取
+		file, err := os.Open(filename)
+		if err != nil {
+			return nil, err
+		}
+		defer func(file *os.File) {
+			_ = file.Close()
+		}(file)
+
+		scanner := bufio.NewScanner(file)
+		for scanner.Scan() {
+			lines = append(lines, scanner.Text())
+		}
+	}
+
+	return lines, nil
 }

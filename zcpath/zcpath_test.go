@@ -1,9 +1,13 @@
 package zcpath
 
 import (
+	"bufio"
 	"fmt"
+	"gitee.com/zhaochuninhefei/zcgolog/zclog"
+	"log"
 	"os"
 	"path"
+	"strconv"
 	"testing"
 )
 
@@ -558,6 +562,61 @@ func TestReadFileToLinesAndAll(t *testing.T) {
 	}
 }
 
+func TestReadFileToLinesBySize(t *testing.T) {
+	zclog.Level = zclog.LOG_LEVEL_DEBUG
+	// 写入测试数据
+	err := writeFile("testdata/testfile.txt", []byte("line1\nline2\nline3\nline4\nline5"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 读取文件
+	lines, err := ReadFileToLinesBySize("testdata/testfile.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 打印lines
+	fmt.Println("按行读取结果:")
+	for _, line := range lines {
+		fmt.Println(line)
+	}
+	// 检查读取结果
+	if len(lines) != 5 {
+		t.Fatal("按行读取错误!")
+	}
+	// 删除测试文件
+	err = os.Remove("testdata/testfile.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 通过循环，流式写入大小超过1MB的文件 testdata/testBigFile.txt
+	err = writeLargeFile("testdata/testBigFile.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 读取文件
+	lines, err = ReadFileToLinesBySize("testdata/testBigFile.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 打印lines
+	fmt.Println("按行读取结果(前10行):")
+	for i, line := range lines {
+		fmt.Println(line)
+		if i == 9 {
+			break
+		}
+	}
+	fmt.Printf("按行读取行数: %d\n", len(lines))
+	// 删除测试文件
+	err = os.Remove("testdata/testBigFile.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+const megabyte = 1024 * 1024
+
 func writeFile(filePath string, bytesContent []byte) error {
 	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
 	if err != nil {
@@ -573,5 +632,34 @@ func writeFile(filePath string, bytesContent []byte) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func writeLargeFile(filePath string) error {
+	// 创建文件
+	f, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer func(f *os.File) {
+		_ = f.Close()
+	}(f)
+	// 创建带缓存的Writer
+	writer := bufio.NewWriterSize(f, 4096)
+	// 写入1MB数据
+	for i := 0; i < megabyte; i++ {
+		_, err = writer.WriteString(strconv.Itoa(i) + "\n")
+		if err != nil {
+			return err
+		}
+
+		// 定期flush以清空缓存
+		if i%100 == 0 {
+			_ = writer.Flush()
+		}
+	}
+	// 写入剩余缓存数据
+	_ = writer.Flush()
+	log.Println("Generated file larger than 1MB")
 	return nil
 }
