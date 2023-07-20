@@ -68,3 +68,29 @@ func TestDiff(t *testing.T) {
 		})
 	}
 }
+
+func TestTrimAndRmSpace(t *testing.T) {
+	type args struct {
+		slice1 []string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{
+			name: "test1",
+			args: args{
+				slice1: []string{"a ", " b", " c	", "	", "  乙  b ", "丙c"},
+			},
+			want: []string{"a", "b", "c", "乙  b", "丙c"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := TrimAndRmSpace(tt.args.slice1); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("TrimAndRmSpace() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

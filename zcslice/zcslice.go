@@ -1,5 +1,7 @@
 package zcslice
 
+import "strings"
+
 // Contains 判断一个字符串是否在一个字符串切片中
 func Contains(slice []string, str string) bool {
 	for _, v := range slice {
@@ -24,6 +26,16 @@ func Diff(slice1, slice2 []string) []string {
 			diff = append(diff, item)
 		}
 	}
-
 	return diff
+}
+
+func TrimAndRmSpace(slice1 []string) []string {
+	var slice2 []string
+	for _, item := range slice1 {
+		trimmed := strings.TrimSpace(item)
+		if trimmed != "" {
+			slice2 = append(slice2, trimmed)
+		}
+	}
+	return slice2
 }
