@@ -41,7 +41,7 @@ func TestContains(t *testing.T) {
 	}
 }
 
-func TestDiff(t *testing.T) {
+func TestSubtract(t *testing.T) {
 	type args struct {
 		slice1 []string
 		slice2 []string
@@ -55,9 +55,9 @@ func TestDiff(t *testing.T) {
 			name: "test1",
 			args: args{
 				slice1: []string{"a", "b", "c", "甲a", "乙b", "丙c"},
-				slice2: []string{"a", "b", "c"},
+				slice2: []string{"a", "甲a", "c"},
 			},
-			want: []string{"甲a", "乙b", "丙c"},
+			want: []string{"b", "乙b", "丙c"},
 		},
 	}
 	for _, tt := range tests {
