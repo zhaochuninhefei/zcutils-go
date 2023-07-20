@@ -12,21 +12,19 @@ func Contains(slice []string, str string) bool {
 	return false
 }
 
-// Diff 计算两个字符串切片的差集
-func Diff(slice1, slice2 []string) []string {
+// Subtract 从sliceAll中移除sliceToSub中的元素
+func Subtract(sliceAll, sliceToSub []string) []string {
 	m := make(map[string]bool)
-
-	for _, item := range slice2 {
+	for _, item := range sliceToSub {
 		m[item] = true
 	}
-
-	var diff []string
-	for _, item := range slice1 {
+	var rest []string
+	for _, item := range sliceAll {
 		if _, ok := m[item]; !ok {
-			diff = append(diff, item)
+			rest = append(rest, item)
 		}
 	}
-	return diff
+	return rest
 }
 
 func TrimAndRmSpace(slice1 []string) []string {

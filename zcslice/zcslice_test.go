@@ -62,8 +62,8 @@ func TestDiff(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Diff(tt.args.slice1, tt.args.slice2); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Diff() = %v, want %v", got, tt.want)
+			if got := Subtract(tt.args.slice1, tt.args.slice2); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Subtract() = %v, want %v", got, tt.want)
 			}
 		})
 	}
