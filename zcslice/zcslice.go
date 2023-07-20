@@ -13,6 +13,7 @@ func Contains(slice []string, str string) bool {
 }
 
 // Subtract 从sliceAll中移除sliceToSub中的元素
+//  注意没有编辑sliceAll，而是返回了一个新的切片。
 func Subtract(sliceAll, sliceToSub []string) []string {
 	m := make(map[string]bool)
 	for _, item := range sliceToSub {
@@ -27,13 +28,15 @@ func Subtract(sliceAll, sliceToSub []string) []string {
 	return rest
 }
 
-func TrimAndRmSpace(slice1 []string) []string {
-	var slice2 []string
-	for _, item := range slice1 {
+// TrimAndRmSpace 对sliceBefore的每个string做trimspace，然后去除空的元素
+//  注意没有编辑sliceBefore，而是返回了一个新的切片。
+func TrimAndRmSpace(sliceBefore []string) []string {
+	var sliceAfter []string
+	for _, item := range sliceBefore {
 		trimmed := strings.TrimSpace(item)
 		if trimmed != "" {
-			slice2 = append(slice2, trimmed)
+			sliceAfter = append(sliceAfter, trimmed)
 		}
 	}
-	return slice2
+	return sliceAfter
 }
