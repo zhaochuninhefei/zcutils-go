@@ -54,3 +54,8 @@ func (ztf Format) ParseSimpleMilliNoPointToTime(timeStr string) (time.Time, erro
 	timeNewStr := timeStr[:14] + "." + timeStr[14:]
 	return time.Parse(ztf.String(), timeNewStr)
 }
+
+// GetNowYMDHMS 获取当前时间戳字符串,格式为: yyyyMMddHHmmss
+func GetNowYMDHMS() string {
+	return TIME_FORMAT_SIMPLE.FormatTimeToStr(time.Now())
+}

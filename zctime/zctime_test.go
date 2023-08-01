@@ -95,3 +95,8 @@ func TestSimpleMilliNoPoint(t *testing.T) {
 
 	fmt.Println()
 }
+
+func TestGetNowYMDHMS(t *testing.T) {
+	timeNow := GetNowYMDHMS()
+	fmt.Println(timeNow)
+}
