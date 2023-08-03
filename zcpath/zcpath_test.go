@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"reflect"
 	"strconv"
 	"testing"
 )
@@ -662,4 +663,72 @@ func writeLargeFile(filePath string) error {
 	_ = writer.Flush()
 	log.Println("Generated file larger than 1MB")
 	return nil
+}
+
+func TestSplitPath(t *testing.T) {
+	type args struct {
+		path string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{
+			name: "test1",
+			args: args{
+				path: "/a/b/c/d.txt",
+			},
+			want: []string{"a", "b", "c", "d.txt"},
+		},
+		{
+			name: "test2",
+			args: args{
+				path: "a/b/c/d.txt",
+			},
+			want: []string{"a", "b", "c", "d.txt"},
+		},
+		{
+			name: "test3",
+			args: args{
+				path: "./a/b/c/d.txt",
+			},
+			want: []string{".", "a", "b", "c", "d.txt"},
+		},
+		{
+			name: "test4",
+			args: args{
+				path: "../a/b/c/d.txt",
+			},
+			want: []string{"..", "a", "b", "c", "d.txt"},
+		},
+		{
+			name: "test5",
+			args: args{
+				path: "C:\\a\\b\\c\\d.txt",
+			},
+			want: []string{"C:", "a", "b", "c", "d.txt"},
+		},
+		{
+			name: "test6",
+			args: args{
+				path: "\\a\\b\\c\\d.txt",
+			},
+			want: []string{"a", "b", "c", "d.txt"},
+		},
+		{
+			name: "test7",
+			args: args{
+				path: "a\\b\\c\\d.txt",
+			},
+			want: []string{"a", "b", "c", "d.txt"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := SplitPath(tt.args.path); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("SplitPath() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

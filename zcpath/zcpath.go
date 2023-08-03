@@ -477,3 +477,25 @@ func ReadFileToLinesBySize(filename string) ([]string, error) {
 
 	return lines, nil
 }
+
+// SplitPath 切分路径
+//  @param path 路径
+//  例如:
+//  SplitPath("/a/b/c/d.txt") = []string{"a", "b", "c", "d.txt"}
+//  SplitPath("a/b/c/d.txt") = []string{"a", "b", "c", "d.txt"}
+//  SplitPath("./a/b/c/d.txt") = []string{".", "a", "b", "c", "d.txt"}
+//  SplitPath("../a/b/c/d.txt") = []string{"..", "a", "b", "c", "d.txt"}
+//  SplitPath("C:\a\b\c\d.txt") = []string{"C:", "a", "b", "c", "d.txt"}
+//  SplitPath("\a\b\c\d.txt") = []string{"a", "b", "c", "d.txt"}
+//  SplitPath("a\b\c\d.txt") = []string{"a", "b", "c", "d.txt"}
+func SplitPath(path string) []string {
+	// 将路径统一转换为/,方便后续处理
+	path = strings.ReplaceAll(path, "\\", "/")
+	// 如果 path以"/"开头，去除开头的"/"
+	if strings.HasPrefix(path, "/") {
+		path = path[1:]
+	}
+	// 切分路径
+	parts := strings.Split(path, "/")
+	return parts
+}
