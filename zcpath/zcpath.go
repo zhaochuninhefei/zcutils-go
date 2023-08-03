@@ -223,6 +223,31 @@ func FileExists(path string) (bool, error) {
 	return true, nil
 }
 
+// FileNotEmpty 判断文件是否非空
+//  @param path 文件路径
+//  文件不存在、或不是文件而是目录、或文件size为0时都返回 false;
+//  文件存在、且是文件、且size>0时返回 true;
+//  获取文件信息失败时返回 false和error。
+func FileNotEmpty(path string) (bool, error) {
+	fileInfo, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		} else {
+			return false, err
+		}
+	}
+	// 判断是否是目录
+	if fileInfo.IsDir() {
+		return false, nil
+	}
+	// 判断文件size
+	if fileInfo.Size() > 0 {
+		return true, nil
+	}
+	return false, nil
+}
+
 // FileCopy 拷贝文件
 //  @param src 源文件路径
 //  @param dst 目标文件路径

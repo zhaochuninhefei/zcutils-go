@@ -800,3 +800,97 @@ func TestFirstDir(t *testing.T) {
 		})
 	}
 }
+
+func TestFileNotEmpty(t *testing.T) {
+	// 创建测试目录
+	ok, err := CreateDir("testdata/TestFileNotEmpty")
+	if !ok && err != nil {
+		t.Fatal(err)
+	}
+	// 创建测试文件 testfile1.txt size为0
+	err = CreateFile(path.Join("testdata/TestFileNotEmpty", "testfile1.txt"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 创建测试文件 testfile2.txt size大于0
+	err = CreateFile(path.Join("testdata/TestFileNotEmpty", "testfile2.txt"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 向 testfile2.txt 写入数据
+	err = writeFile(path.Join("testdata/TestFileNotEmpty", "testfile2.txt"), []byte("test"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 创建测试子目录 subdir
+	ok, err = CreateDir(path.Join("testdata/TestFileNotEmpty", "subdir"))
+	if !ok && err != nil {
+		t.Fatal(err)
+	}
+	type args struct {
+		path string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    bool
+		wantErr bool
+	}{
+		{
+			name: "test1",
+			args: args{
+				path: "testdata/TestFileNotEmpty/testfile1.txt",
+			},
+			want:    false,
+			wantErr: false,
+		},
+		{
+			name: "test2",
+			args: args{
+				path: "testdata/TestFileNotEmpty/testfile2.txt",
+			},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "test3",
+			args: args{
+				path: "testdata/TestFileNotEmpty/subdir",
+			},
+			want:    false,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := FileNotEmpty(tt.args.path)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("FileNotEmpty() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("FileNotEmpty() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+	// 删除测试文件
+	err = os.Remove("testdata/TestFileNotEmpty/testfile1.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 删除测试文件
+	err = os.Remove("testdata/TestFileNotEmpty/testfile2.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 删除测试子目录 subdir
+	err = os.Remove("testdata/TestFileNotEmpty/subdir")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 删除测试目录
+	err = os.RemoveAll("testdata/TestFileNotEmpty")
+	if err != nil {
+		t.Fatal(err)
+	}
+}
