@@ -732,3 +732,71 @@ func TestSplitPath(t *testing.T) {
 		})
 	}
 }
+
+func TestFirstDir(t *testing.T) {
+	type args struct {
+		path string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "test1",
+			args: args{
+				path: "/a/b/c/d.txt",
+			},
+			want: "a",
+		},
+		{
+			name: "test2",
+			args: args{
+				path: "a/b/c/d.txt",
+			},
+			want: "a",
+		},
+		{
+			name: "test3",
+			args: args{
+				path: "./a/b/c/d.txt",
+			},
+			want: ".",
+		},
+		{
+			name: "test4",
+			args: args{
+				path: "../a/b/c/d.txt",
+			},
+			want: "..",
+		},
+		{
+			name: "test5",
+			args: args{
+				path: "C:\\a\\b\\c\\d.txt",
+			},
+			want: "C:",
+		},
+		{
+			name: "test6",
+			args: args{
+				path: "\\a\\b\\c\\d.txt",
+			},
+			want: "a",
+		},
+		{
+			name: "test7",
+			args: args{
+				path: "a\\b\\c\\d.txt",
+			},
+			want: "a",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := FirstDir(tt.args.path); got != tt.want {
+				t.Errorf("FirstDir() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

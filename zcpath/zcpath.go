@@ -499,3 +499,18 @@ func SplitPath(path string) []string {
 	parts := strings.Split(path, "/")
 	return parts
 }
+
+// FirstDir 获取path的第一个目录
+//  @param path 路径
+//  例如:
+//  FirstDir("/a/b/c/d.txt") = "a"
+//  FirstDir("a/b/c/d.txt") = "a"
+//  FirstDir("./a/b/c/d.txt") = "."
+//  FirstDir("../a/b/c/d.txt") = ".."
+//  FirstDir("C:\a\b\c\d.txt") = "C:"
+//  FirstDir("\a\b\c\d.txt") = "a"
+//  FirstDir("a\b\c\d.txt") = "a"
+func FirstDir(path string) string {
+	parts := SplitPath(path)
+	return parts[0]
+}
