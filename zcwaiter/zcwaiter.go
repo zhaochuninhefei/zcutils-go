@@ -39,6 +39,11 @@ func NewCustomWaiter(waitMaxTimes int, waitMSPerTime time.Duration) (*Waiter, er
 	}, nil
 }
 
+// WaitUntil 让当前goroutine等待，直到传入的supplier函数返回true，或者超时。
+//  @param supplier 等待终止函数
+//  该函数会不断尝试调用supplier函数，直到其返回值为true;
+//  但最多只会调用`Waiter.waitMaxTimes`次;
+//  两次调用supplier函数之间的间隔时间为`Waiter.waitMSPerTime`。
 func (w *Waiter) WaitUntil(supplier func() bool) error {
 	zclog.Printf("waitMaxTimes : %d; waitMSPerTime : %d", w.waitMaxTimes, w.waitMSPerTime)
 	ticker := time.NewTicker(w.waitMSPerTime * time.Millisecond)

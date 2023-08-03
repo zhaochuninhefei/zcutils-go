@@ -48,7 +48,7 @@ func TestWaiter_WaitUntil(t *testing.T) {
 					return
 				}
 			}()
-
+			_ = zcwaiter.NewWaiter()
 			w, err := zcwaiter.NewCustomWaiter(tt.fields.waitMaxTimes, tt.fields.waitMSPerTime)
 			if err != nil {
 				t.Fatal(err)
