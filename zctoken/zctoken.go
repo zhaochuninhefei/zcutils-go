@@ -145,7 +145,7 @@ func CreateStdPayloads(iss string, sub string, aud string, jti string, expSecond
 	return payloads
 }
 
-// CreateSplPayloads 创建简单版凭证有效负载
+// CreateSplPayloads 创建简易凭证有效负载
 //
 //  @param aud 受众
 //  @param expSeconds
@@ -188,7 +188,7 @@ func PrepareStdTokenStruct(
 	return token, nil
 }
 
-// PrepareSplTokenStruct 准备标准凭证结构体
+// PrepareSplTokenStruct 准备简易凭证结构体
 //
 //  @param aud 受众
 //  @param expSeconds 过期时间秒数
