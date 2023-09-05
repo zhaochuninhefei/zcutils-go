@@ -40,3 +40,13 @@ func TrimAndRmSpace(sliceBefore []string) []string {
 	}
 	return sliceAfter
 }
+
+// ReverseBytes 反转字节切片
+func ReverseBytes(input []byte) []byte {
+	length := len(input)
+	reversed := make([]byte, length)
+	for i := 0; i < length; i++ {
+		reversed[i] = input[length-1-i]
+	}
+	return reversed
+}

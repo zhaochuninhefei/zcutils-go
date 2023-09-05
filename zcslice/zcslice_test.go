@@ -1,6 +1,7 @@
 package zcslice
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -91,6 +92,41 @@ func TestTrimAndRmSpace(t *testing.T) {
 			if got := TrimAndRmSpace(tt.args.slice1); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("TrimAndRmSpace() = %v, want %v", got, tt.want)
 			}
+		})
+	}
+}
+
+func TestReverseBytes(t *testing.T) {
+	type args struct {
+		input []byte
+	}
+	tests := []struct {
+		name string
+		args args
+		want []byte
+	}{
+		{
+			name: "test1",
+			args: args{
+				input: []byte{1, 2, 3, 4},
+			},
+			want: []byte{4, 3, 2, 1},
+		},
+		{
+			name: "test2",
+			args: args{
+				input: []byte{13, 21, 3, 14, 53, 69, 71, 8},
+			},
+			want: []byte{8, 71, 69, 53, 14, 3, 21, 13},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := ReverseBytes(tt.args.input)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ReverseBytes() = %v, want %v", got, tt.want)
+			}
+			fmt.Printf("ReverseBytes() = %v, want %v\n", got, tt.want)
 		})
 	}
 }
