@@ -19,7 +19,6 @@ func Test_executeCommand(t *testing.T) {
 		want    string
 		wantErr bool
 	}{
-		// TODO: Add test cases.
 		{
 			name: "test1",
 			args: args{
