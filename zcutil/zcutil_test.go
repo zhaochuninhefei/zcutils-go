@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"reflect"
 	"strings"
@@ -31,7 +30,7 @@ func TestBytesToInt32(t *testing.T) {
 
 func TestTempDir(t *testing.T) {
 
-	tmpKeyStore, err := ioutil.TempDir("testdata", "msp-keystore")
+	tmpKeyStore, err := os.MkdirTemp("testdata", "msp-keystore")
 	if err != nil {
 		t.Fatal(err)
 	}
