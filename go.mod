@@ -1,9 +1,10 @@
 module gitee.com/zhaochuninhefei/zcutils-go
 
-go 1.17
+go 1.22
 
 require (
-	gitee.com/zhaochuninhefei/gmgo v0.0.21
+	gitee.com/zhaochuninhefei/gmgo v0.0.31
+	gitee.com/zhaochuninhefei/zcgolog v0.0.23
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/golang/protobuf v1.5.2
 	github.com/nxadm/tail v1.4.8
@@ -14,7 +15,6 @@ require (
 )
 
 require (
-	gitee.com/zhaochuninhefei/zcgolog v0.0.15 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
