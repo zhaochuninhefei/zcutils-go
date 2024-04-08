@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"gitee.com/zhaochuninhefei/zcgolog/zclog"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -13,9 +12,10 @@ import (
 )
 
 // CreateDir 创建目录,若目录已经存在，会返回错误信息但bool返回true。
-//  @param path 目录路径
-//  @return bool 创建成功与否
-//  @return error
+//
+//	@param path 目录路径
+//	@return bool 创建成功与否
+//	@return error
 func CreateDir(path string) (bool, error) {
 	if dirInfo, err := os.Stat(path); err == nil && dirInfo.IsDir() {
 		return true, fmt.Errorf("该目录已经存在: %s", path)
@@ -29,7 +29,8 @@ func CreateDir(path string) (bool, error) {
 }
 
 // ClearDir 清空目录
-//  该函数会删除目录下的所有文件和子目录, 但是不会删除目录本身
+//
+//	该函数会删除目录下的所有文件和子目录, 但是不会删除目录本身
 func ClearDir(dir string) error {
 	// 先判断dir是否存在, 如果不存在, 则创建
 	if dirInfo, err := os.Stat(dir); err != nil || !dirInfo.IsDir() {
@@ -73,7 +74,7 @@ func ClearDir(dir string) error {
 
 // IsDirEmpty 判断目录是否为空
 func IsDirEmpty(dirPath string) (bool, error) {
-	files, err := ioutil.ReadDir(dirPath)
+	files, err := os.ReadDir(dirPath)
 	if err != nil {
 		return false, err
 	}
@@ -112,7 +113,7 @@ func RemoveFile(filePath string) error {
 }
 
 // RemoveFileWithWildcard 根据带通配符的文件路径删除文件
-//  - filePath: 要删除的文件path, 如"/a/b/*.txt"
+//   - filePath: 要删除的文件path, 如"/a/b/*.txt"
 func RemoveFileWithWildcard(filePath string) error {
 	// 使用通配符查找匹配的文件
 	matches, err := filepath.Glob(filePath)
@@ -130,10 +131,11 @@ func RemoveFileWithWildcard(filePath string) error {
 }
 
 // PrintDirTree 打印目录树
-//  @param root 根目录
-//  @param level 打印层级, 0只打印根目录自身，1表示打印一层(根目录下的文件与目录), 2表示打印两层, 依次类推。-1表示打印所有层级。
-//  @param onlyDir 只打印目录
-//  @param showHidden 是否显示隐藏文件
+//
+//	@param root 根目录
+//	@param level 打印层级, 0只打印根目录自身，1表示打印一层(根目录下的文件与目录), 2表示打印两层, 依次类推。-1表示打印所有层级。
+//	@param onlyDir 只打印目录
+//	@param showHidden 是否显示隐藏文件
 func PrintDirTree(root string, level int, onlyDir bool, showHidden bool) error {
 	walkFunc := func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -205,7 +207,8 @@ func PrintDirTreeWithMode(root string, level int, onlyDir bool, showHidden bool)
 }
 
 // FileExists 判断文件是否存在，且是不是文件
-//  @param path 文件路径
+//
+//	@param path 文件路径
 func FileExists(path string) (bool, error) {
 	// 判断文件是否存在
 	fileInfo, err := os.Stat(path)
@@ -224,10 +227,11 @@ func FileExists(path string) (bool, error) {
 }
 
 // FileNotEmpty 判断文件是否非空
-//  @param path 文件路径
-//  文件不存在、或不是文件而是目录、或文件size为0时都返回 false;
-//  文件存在、且是文件、且size>0时返回 true;
-//  获取文件信息失败时返回 false和error。
+//
+//	@param path 文件路径
+//	文件不存在、或不是文件而是目录、或文件size为0时都返回 false;
+//	文件存在、且是文件、且size>0时返回 true;
+//	获取文件信息失败时返回 false和error。
 func FileNotEmpty(path string) (bool, error) {
 	fileInfo, err := os.Stat(path)
 	if err != nil {
@@ -249,8 +253,9 @@ func FileNotEmpty(path string) (bool, error) {
 }
 
 // FileCopy 拷贝文件
-//  @param src 源文件路径
-//  @param dst 目标文件路径
+//
+//	@param src 源文件路径
+//	@param dst 目标文件路径
 func FileCopy(src string, dst string) error {
 	// 打开源文件
 	srcFile, err := os.Open(src)
@@ -283,8 +288,9 @@ func FileCopy(src string, dst string) error {
 }
 
 // FileCopyToDir 拷贝文件到目录
-//  @param src 源文件路径
-//  @param dstDir 目标目录
+//
+//	@param src 源文件路径
+//	@param dstDir 目标目录
 func FileCopyToDir(src string, dstDir string) error {
 	// 获取源文件名
 	srcFileName := filepath.Base(src)
@@ -304,8 +310,9 @@ func FileCopyToDir(src string, dstDir string) error {
 }
 
 // FileCopyFromDirToDir 拷贝源目录下所有文件到目标目录，包括子目录及子目录下的文件
-//  @param srcDir 源目录
-//  @param dstDir 目标目录
+//
+//	@param srcDir 源目录
+//	@param dstDir 目标目录
 func FileCopyFromDirToDir(srcDir string, dstDir string) error {
 	// 检查srcDir是否存在,是否是目录
 	srcInfo, err := os.Stat(srcDir)
@@ -321,7 +328,7 @@ func FileCopyFromDirToDir(srcDir string, dstDir string) error {
 		return err
 	}
 	// 获取源目录下所有文件和目录
-	files, err := ioutil.ReadDir(srcDir)
+	files, err := os.ReadDir(srcDir)
 	if err != nil {
 		return err
 	}
@@ -338,11 +345,11 @@ func FileCopyFromDirToDir(srcDir string, dstDir string) error {
 			}
 		} else {
 			// 如果是文件，拷贝文件
-			data, err := ioutil.ReadFile(srcPath)
+			data, err := os.ReadFile(srcPath)
 			if err != nil {
 				return err
 			}
-			err = ioutil.WriteFile(destPath, data, file.Mode())
+			err = os.WriteFile(destPath, data, file.Type())
 			if err != nil {
 				return err
 			}
@@ -352,8 +359,8 @@ func FileCopyFromDirToDir(srcDir string, dstDir string) error {
 }
 
 // FileWithWildcardCopyToDir 将含有通配符的文件路径指向的文件拷贝到目标目录下
-//  - sourcePath: 含有通配符(*)的文件路径，如: /a/b/*.txt
-//  - dstDir: 目标目录，如: /c/d
+//   - sourcePath: 含有通配符(*)的文件路径，如: /a/b/*.txt
+//   - dstDir: 目标目录，如: /c/d
 //
 // 效果类似: cp /a/b/*.txt /c/d
 func FileWithWildcardCopyToDir(sourcePath string, dstDir string) error {
@@ -373,7 +380,8 @@ func FileWithWildcardCopyToDir(sourcePath string, dstDir string) error {
 }
 
 // DirCopy 拷贝目录
-//  例如: DirCopy("/x/y/z", "/a/b/c") 效果: 将子目录z拷贝到目标目录/a/b/c下面，即"/a/b/c/z"
+//
+//	例如: DirCopy("/x/y/z", "/a/b/c") 效果: 将子目录z拷贝到目标目录/a/b/c下面，即"/a/b/c/z"
 func DirCopy(src string, dst string) error {
 	// 获取源目录名
 	srcDirName := filepath.Base(src)
@@ -446,10 +454,11 @@ func ChmodDir(dir string, mode os.FileMode) error {
 }
 
 // ReadFileToLinesAndAll 从filePath读取文件内容，返回每一行的内容和所有内容
-//  使用ioutil.ReadFile一次性读取文件全部字节，建议只在读取小文件(<1MB)时使用该函数。
+//
+//	使用ioutil.ReadFile一次性读取文件全部字节，建议只在读取小文件(<1MB)时使用该函数。
 func ReadFileToLinesAndAll(filePath string) ([]string, string, error) {
 	// 读取文件内容
-	fileBytes, err := ioutil.ReadFile(filePath)
+	fileBytes, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, "", err
 	}
@@ -464,8 +473,9 @@ func ReadFileToLinesAndAll(filePath string) ([]string, string, error) {
 const maxFileSize = 1 << 20 // 1MB
 
 // ReadFileToLinesBySize 根据文件大小读取行
-//  当文件大小不足1MB时，整个读入内存;
-//  当文件大小达到或超过1MB时，按行读取，注意每行token数量不能超过65536.
+//
+//	当文件大小不足1MB时，整个读入内存;
+//	当文件大小达到或超过1MB时，按行读取，注意每行token数量不能超过65536.
 func ReadFileToLinesBySize(filename string) ([]string, error) {
 	// 获取文件信息
 	fi, err := os.Stat(filename)
@@ -478,7 +488,7 @@ func ReadFileToLinesBySize(filename string) ([]string, error) {
 	if fi.Size() < maxFileSize {
 		zclog.Debugf("按小文件读取, size: %d", fi.Size())
 		// 小文件,直接读取到内存
-		content, err := ioutil.ReadFile(filename)
+		content, err := os.ReadFile(filename)
 		if err != nil {
 			return nil, err
 		}
@@ -504,15 +514,16 @@ func ReadFileToLinesBySize(filename string) ([]string, error) {
 }
 
 // SplitPath 切分路径
-//  @param path 路径
-//  例如:
-//  SplitPath("/a/b/c/d.txt") = []string{"a", "b", "c", "d.txt"}
-//  SplitPath("a/b/c/d.txt") = []string{"a", "b", "c", "d.txt"}
-//  SplitPath("./a/b/c/d.txt") = []string{".", "a", "b", "c", "d.txt"}
-//  SplitPath("../a/b/c/d.txt") = []string{"..", "a", "b", "c", "d.txt"}
-//  SplitPath("C:\a\b\c\d.txt") = []string{"C:", "a", "b", "c", "d.txt"}
-//  SplitPath("\a\b\c\d.txt") = []string{"a", "b", "c", "d.txt"}
-//  SplitPath("a\b\c\d.txt") = []string{"a", "b", "c", "d.txt"}
+//
+//	@param path 路径
+//	例如:
+//	SplitPath("/a/b/c/d.txt") = []string{"a", "b", "c", "d.txt"}
+//	SplitPath("a/b/c/d.txt") = []string{"a", "b", "c", "d.txt"}
+//	SplitPath("./a/b/c/d.txt") = []string{".", "a", "b", "c", "d.txt"}
+//	SplitPath("../a/b/c/d.txt") = []string{"..", "a", "b", "c", "d.txt"}
+//	SplitPath("C:\a\b\c\d.txt") = []string{"C:", "a", "b", "c", "d.txt"}
+//	SplitPath("\a\b\c\d.txt") = []string{"a", "b", "c", "d.txt"}
+//	SplitPath("a\b\c\d.txt") = []string{"a", "b", "c", "d.txt"}
 func SplitPath(path string) []string {
 	// 将路径统一转换为/,方便后续处理
 	path = strings.ReplaceAll(path, "\\", "/")
@@ -526,15 +537,16 @@ func SplitPath(path string) []string {
 }
 
 // FirstDir 获取path的第一个目录
-//  @param path 路径
-//  例如:
-//  FirstDir("/a/b/c/d.txt") = "a"
-//  FirstDir("a/b/c/d.txt") = "a"
-//  FirstDir("./a/b/c/d.txt") = "."
-//  FirstDir("../a/b/c/d.txt") = ".."
-//  FirstDir("C:\a\b\c\d.txt") = "C:"
-//  FirstDir("\a\b\c\d.txt") = "a"
-//  FirstDir("a\b\c\d.txt") = "a"
+//
+//	@param path 路径
+//	例如:
+//	FirstDir("/a/b/c/d.txt") = "a"
+//	FirstDir("a/b/c/d.txt") = "a"
+//	FirstDir("./a/b/c/d.txt") = "."
+//	FirstDir("../a/b/c/d.txt") = ".."
+//	FirstDir("C:\a\b\c\d.txt") = "C:"
+//	FirstDir("\a\b\c\d.txt") = "a"
+//	FirstDir("a\b\c\d.txt") = "a"
 func FirstDir(path string) string {
 	parts := SplitPath(path)
 	return parts[0]
