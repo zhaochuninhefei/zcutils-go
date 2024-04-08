@@ -19,20 +19,21 @@ const (
 var LockOsArgs sync.Mutex
 
 // TakeArgFromOsArgs 从os.Args中获取指定参数
-//  @param argName : 参数名, 忽略大小写, 不可传零值。
-//  @param remove : 是否从os.Args中移除该参数。
-//  @param defaultVal : 参数默认值, 参数未设置时返回该值。
-//  @return val 指定参数值。
+//
+//	@param argName : 参数名, 忽略大小写, 不可传零值。
+//	@param remove : 是否从os.Args中移除该参数。
+//	@param defaultVal : 参数默认值, 参数未设置时返回该值。
+//	@return val 指定参数值。
 //
 // 参数类型支持以下三种:
-//  - 参数格式 `--test`或`-test` : 标识类型参数，如果设置了，就返回"y"，否则返回""。
-//  - 参数格式 `--test xxx`或`-test xxx` : 键值对类型参数，如果设置了，就返回对应的设值。
-//  - 参数格式 `--test=xxx`或`-test=xxx` : 带等号的键值对类型参数，如果设置了，就返回"="设值。
+//   - 参数格式 `--test`或`-test` : 标识类型参数，如果设置了，就返回"y"，否则返回""。
+//   - 参数格式 `--test xxx`或`-test xxx` : 键值对类型参数，如果设置了，就返回对应的设值。
+//   - 参数格式 `--test=xxx`或`-test=xxx` : 带等号的键值对类型参数，如果设置了，就返回"="设值。
 //
 // 注意:
-//  - 如果参数重复设置，后面的重复参数会覆盖前面的相同参数。
-//  - 如果参数重复设置且需要移除，则会移除全部的该参数。
-//  - 该函数会使用`zcargs.LockOsArgs`上同步锁, 建议程序中其他读写`os.Args`的goroutine也使用该锁。
+//   - 如果参数重复设置，后面的重复参数会覆盖前面的相同参数。
+//   - 如果参数重复设置且需要移除，则会移除全部的该参数。
+//   - 该函数会使用`zcargs.LockOsArgs`上同步锁, 建议程序中其他读写`os.Args`的goroutine也使用该锁。
 func TakeArgFromOsArgs(argName string, remove bool, defaultVal string) (val string) {
 	// 上同步锁
 	LockOsArgs.Lock()
@@ -101,6 +102,7 @@ func TakeArgFromOsArgs(argName string, remove bool, defaultVal string) (val stri
 		}
 		// 设置返回值，以及当前参数的起始与结束索引
 		var startIndex, stopIndex int
+		//goland:noinspection GoDfaConstantCondition
 		switch argType {
 		case ArgType1:
 			// 该参数为标识类参数，返回"y"即可
