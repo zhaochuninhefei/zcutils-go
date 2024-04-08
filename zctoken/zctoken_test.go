@@ -10,7 +10,7 @@ import (
 	"gitee.com/zhaochuninhefei/gmgo/sm2"
 	"gitee.com/zhaochuninhefei/gmgo/x509"
 	"gitee.com/zhaochuninhefei/zcutils-go/zcrandom"
-	"io/ioutil"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -150,12 +150,12 @@ func TestBuildTokenWithGMTimeout(t *testing.T) {
 
 func TestBuildTokenWithSm2Sm3(t *testing.T) {
 	// 从pem文件读取私钥pem
-	privKeyPem, err := ioutil.ReadFile("testdata/sm2_pri_key.pem")
+	privKeyPem, err := os.ReadFile("testdata/sm2_pri_key.pem")
 	if err != nil {
 		t.Fatal(err)
 	}
 	// 从pem文件读取公钥pem
-	pubKeyPem, err := ioutil.ReadFile("testdata/sm2_pub_key.pem")
+	pubKeyPem, err := os.ReadFile("testdata/sm2_pub_key.pem")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -196,12 +196,12 @@ func TestBuildTokenWithSm2Sm3(t *testing.T) {
 
 func TestBuildTokenWithSm2Sm3Timeout(t *testing.T) {
 	// 从pem文件读取私钥pem
-	privKeyPem, err := ioutil.ReadFile("testdata/sm2_pri_key.pem")
+	privKeyPem, err := os.ReadFile("testdata/sm2_pri_key.pem")
 	if err != nil {
 		t.Fatal(err)
 	}
 	// 从pem文件读取公钥pem
-	pubKeyPem, err := ioutil.ReadFile("testdata/sm2_pub_key.pem")
+	pubKeyPem, err := os.ReadFile("testdata/sm2_pub_key.pem")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -238,12 +238,12 @@ func TestBuildTokenWithSm2Sm3Timeout(t *testing.T) {
 
 func TestBuildTokenWithEcdsa(t *testing.T) {
 	// 从pem文件读取私钥pem
-	privKeyPem, err := ioutil.ReadFile("testdata/ec_pri_key.pem")
+	privKeyPem, err := os.ReadFile("testdata/ec_pri_key.pem")
 	if err != nil {
 		t.Fatal(err)
 	}
 	// 从pem文件读取公钥pem
-	pubKeyPem, err := ioutil.ReadFile("testdata/ec_pub_key.pem")
+	pubKeyPem, err := os.ReadFile("testdata/ec_pub_key.pem")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -283,12 +283,12 @@ func TestBuildTokenWithEcdsa(t *testing.T) {
 
 func TestBuildTokenWithEd25519(t *testing.T) {
 	// 从pem文件读取私钥pem
-	privKeyPem, err := ioutil.ReadFile("testdata/ed_pri_key.pem")
+	privKeyPem, err := os.ReadFile("testdata/ed_pri_key.pem")
 	if err != nil {
 		t.Fatal(err)
 	}
 	// 从pem文件读取公钥pem
-	pubKeyPem, err := ioutil.ReadFile("testdata/ed_pub_key.pem")
+	pubKeyPem, err := os.ReadFile("testdata/ed_pub_key.pem")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -400,7 +400,7 @@ func TestBuildTokenWithHMACSHA256(t *testing.T) {
 
 func BenchmarkBuildTokenWithSM2SM3(b *testing.B) {
 	// 从pem文件读取私钥pem
-	privKeyPem, err := ioutil.ReadFile("testdata/sm2_pri_key.pem")
+	privKeyPem, err := os.ReadFile("testdata/sm2_pri_key.pem")
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -421,7 +421,7 @@ func BenchmarkBuildTokenWithSM2SM3(b *testing.B) {
 
 func BenchmarkBuildTokenWithECDSA(b *testing.B) {
 	// 从pem文件读取私钥pem
-	privKeyPem, err := ioutil.ReadFile("testdata/ec_pri_key.pem")
+	privKeyPem, err := os.ReadFile("testdata/ec_pri_key.pem")
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -442,7 +442,7 @@ func BenchmarkBuildTokenWithECDSA(b *testing.B) {
 
 func BenchmarkBuildTokenWithED25519(b *testing.B) {
 	// 从pem文件读取私钥pem
-	privKeyPem, err := ioutil.ReadFile("testdata/ed_pri_key.pem")
+	privKeyPem, err := os.ReadFile("testdata/ed_pri_key.pem")
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -499,12 +499,12 @@ func BenchmarkBuildTokenWithHMACSHA256(b *testing.B) {
 
 func BenchmarkCheckTokenWithSM2SM3(b *testing.B) {
 	// 从pem文件读取私钥pem
-	privKeyPem, err := ioutil.ReadFile("testdata/sm2_pri_key.pem")
+	privKeyPem, err := os.ReadFile("testdata/sm2_pri_key.pem")
 	if err != nil {
 		b.Fatal(err)
 	}
 	// 从pem文件读取公钥pem
-	pubKeyPem, err := ioutil.ReadFile("testdata/sm2_pub_key.pem")
+	pubKeyPem, err := os.ReadFile("testdata/sm2_pub_key.pem")
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -530,12 +530,12 @@ func BenchmarkCheckTokenWithSM2SM3(b *testing.B) {
 
 func BenchmarkCheckTokenWithECDSA(b *testing.B) {
 	// 从pem文件读取私钥pem
-	privKeyPem, err := ioutil.ReadFile("testdata/ec_pri_key.pem")
+	privKeyPem, err := os.ReadFile("testdata/ec_pri_key.pem")
 	if err != nil {
 		b.Fatal(err)
 	}
 	// 从pem文件读取公钥pem
-	pubKeyPem, err := ioutil.ReadFile("testdata/ec_pub_key.pem")
+	pubKeyPem, err := os.ReadFile("testdata/ec_pub_key.pem")
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -561,12 +561,12 @@ func BenchmarkCheckTokenWithECDSA(b *testing.B) {
 
 func BenchmarkCheckTokenWithED25519(b *testing.B) {
 	// 从pem文件读取私钥pem
-	privKeyPem, err := ioutil.ReadFile("testdata/ed_pri_key.pem")
+	privKeyPem, err := os.ReadFile("testdata/ed_pri_key.pem")
 	if err != nil {
 		b.Fatal(err)
 	}
 	// 从pem文件读取公钥pem
-	pubKeyPem, err := ioutil.ReadFile("testdata/ed_pub_key.pem")
+	pubKeyPem, err := os.ReadFile("testdata/ed_pub_key.pem")
 	if err != nil {
 		b.Fatal(err)
 	}
