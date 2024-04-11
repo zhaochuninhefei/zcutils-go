@@ -2,10 +2,17 @@ package zcssh
 
 import (
 	"fmt"
+	"os"
 	"testing"
 )
 
 func Test_executeCommand(t *testing.T) {
+	// 从 testdata/localPwd.txt 读取密码
+	bytesPwd, err := os.ReadFile("testdata/localPwd.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	pwdPlain := string(bytesPwd)
 	type args struct {
 		user     string
 		password string
@@ -23,7 +30,7 @@ func Test_executeCommand(t *testing.T) {
 			name: "test1",
 			args: args{
 				user:     "zhaochun",
-				password: "password",
+				password: pwdPlain,
 				host:     "localhost",
 				port:     "22",
 				command:  "free",
@@ -45,6 +52,12 @@ func Test_executeCommand(t *testing.T) {
 }
 
 func Test_executeCommands(t *testing.T) {
+	// 从 testdata/localPwd.txt 读取密码
+	bytesPwd, err := os.ReadFile("testdata/localPwd.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	pwdPlain := string(bytesPwd)
 	type args struct {
 		user     string
 		password string
@@ -62,7 +75,7 @@ func Test_executeCommands(t *testing.T) {
 			name: "test1",
 			args: args{
 				user:     "zhaochun",
-				password: "password",
+				password: pwdPlain,
 				host:     "localhost",
 				port:     "22",
 				commands: []string{"free", "cat /asdfasdfasdf", "id", "pwd"},

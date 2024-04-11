@@ -20,3 +20,4 @@ zctoken/testdata/*
 zcpath/testdata/*
 zcutil/testdata/*
 /zccompress/testdata/
+/zcssh/testdata/localPwd.txt
