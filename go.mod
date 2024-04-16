@@ -3,10 +3,11 @@ module gitee.com/zhaochuninhefei/zcutils-go
 go 1.22
 
 require (
-	gitee.com/zhaochuninhefei/gmgo v0.1.0
+	gitee.com/zhaochuninhefei/gmgo v0.1.1
 	gitee.com/zhaochuninhefei/zcgolog v0.0.23
 	github.com/fsnotify/fsnotify v1.7.0
-	github.com/golang/protobuf v1.5.4 // 此处依赖废弃的`github.com/golang/protobuf`包是因为`protoreflect.GetFieldsByProperties`函数使用了`github.com/golang/protobuf/proto`的弃用函数`GetProperties`作为兼容老版本protobuf的功能。
+	// 此处依赖废弃的`github.com/golang/protobuf`包是因为`protoreflect.GetFieldsByProperties`函数使用了`github.com/golang/protobuf/proto`的弃用函数`GetProperties`作为兼容老版本protobuf的功能。
+	github.com/golang/protobuf v1.5.4
 	github.com/nxadm/tail v1.4.11
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/crypto v0.22.0
