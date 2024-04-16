@@ -11,7 +11,7 @@ cd ../../
 
 # 等待控制台输入任意字符继续
 echo
-read -p "protobuf 测试用例 结束，按下任意按键继续..." -n 1
+read -rp "protobuf 测试用例 结束，按下任意按键继续..." -n 1
 echo
 
 # zcargs
@@ -22,7 +22,7 @@ cd ../../
 
 # 等待控制台输入任意字符继续
 echo
-read -p "zcargs 测试用例 结束，按下任意按键继续..." -n 1
+read -rp "zcargs 测试用例 结束，按下任意按键继续..." -n 1
 echo
 
 # zcbitmap
@@ -33,7 +33,7 @@ cd ../
 
 # 等待控制台输入任意字符继续
 echo
-read -p "zcbitmap 测试用例 结束，按下任意按键继续..." -n 1
+read -rp "zcbitmap 测试用例 结束，按下任意按键继续..." -n 1
 echo
 
 # zccompress
@@ -44,7 +44,7 @@ cd ../
 
 # 等待控制台输入任意字符继续
 echo
-read -p "zccompress 测试用例 结束，按下任意按键继续..." -n 1
+read -rp "zccompress 测试用例 结束，按下任意按键继续..." -n 1
 echo
 
 # zcpath
@@ -55,7 +55,7 @@ cd ../
 
 # 等待控制台输入任意字符继续
 echo
-read -p "zcpath 测试用例 结束，按下任意按键继续..." -n 1
+read -rp "zcpath 测试用例 结束，按下任意按键继续..." -n 1
 echo
 
 # zcrandom
@@ -66,7 +66,7 @@ cd ../
 
 # 等待控制台输入任意字符继续
 echo
-read -p "zcrandom 测试用例 结束，按下任意按键继续..." -n 1
+read -rp "zcrandom 测试用例 结束，按下任意按键继续..." -n 1
 echo
 
 # zcslice
@@ -77,7 +77,7 @@ cd ../
 
 # 等待控制台输入任意字符继续
 echo
-read -p "zcslice 测试用例 结束，按下任意按键继续..." -n 1
+read -rp "zcslice 测试用例 结束，按下任意按键继续..." -n 1
 echo
 
 # zcssh
@@ -88,7 +88,7 @@ cd ../
 
 # 等待控制台输入任意字符继续
 echo
-read -p "zcssh 测试用例 结束，按下任意按键继续..." -n 1
+read -rp "zcssh 测试用例 结束，按下任意按键继续..." -n 1
 echo
 
 # zcstr
@@ -99,7 +99,7 @@ cd ../
 
 # 等待控制台输入任意字符继续
 echo
-read -p "zcstr 测试用例 结束，按下任意按键继续..." -n 1
+read -rp "zcstr 测试用例 结束，按下任意按键继续..." -n 1
 echo
 
 # zcsync
@@ -110,7 +110,7 @@ cd ../
 
 # 等待控制台输入任意字符继续
 echo
-read -p "zcsync 测试用例 结束，按下任意按键继续..." -n 1
+read -rp "zcsync 测试用例 结束，按下任意按键继续..." -n 1
 echo
 
 # zctime
@@ -121,7 +121,7 @@ cd ../
 
 # 等待控制台输入任意字符继续
 echo
-read -p "zctime 测试用例 结束，按下任意按键继续..." -n 1
+read -rp "zctime 测试用例 结束，按下任意按键继续..." -n 1
 echo
 
 # zctoken
@@ -132,7 +132,7 @@ cd ../
 
 # 等待控制台输入任意字符继续
 echo
-read -p "zctoken 测试用例 结束，按下任意按键继续..." -n 1
+read -rp "zctoken 测试用例 结束，按下任意按键继续..." -n 1
 echo
 
 # zcutil
@@ -143,7 +143,7 @@ cd ../
 
 # 等待控制台输入任意字符继续
 echo
-read -p "zcutil 测试用例 结束，按下任意按键继续..." -n 1
+read -rp "zcutil 测试用例 结束，按下任意按键继续..." -n 1
 echo
 
 
