@@ -3,15 +3,26 @@
 
 set -e
 
-# protobuf
-echo "protobuf 测试用例"
+# protoreflect
+echo "protoreflect 测试用例"
 cd protobuf/protoreflect
 go test
 cd ../../
 
 # 等待控制台输入任意字符继续
 echo
-read -rp "protobuf 测试用例 结束，按下任意按键继续..." -n 1
+read -rp "protoreflect 测试用例 结束，按下任意按键继续..." -n 1
+echo
+
+# protobuffer
+echo "protobuffer 测试用例"
+cd protobuf/protobuffer
+go test
+cd ../../
+
+# 等待控制台输入任意字符继续
+echo
+read -rp "protobuffer 测试用例 结束，按下任意按键继续..." -n 1
 echo
 
 # zcargs
