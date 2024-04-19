@@ -3,6 +3,7 @@ protobuf相关操作包
 
 # 功能列表
 
+## protoreflect
 - GetFields 获取目标proto消息的字段信息
 - GetFieldsByProperties 根据StructProperties获取proto消息字段信息，注意，该函数使用了`github.com/golang/protobuf/proto`的弃用函数`GetProperties`
 - IsGeneratedAutoFields 判断字段是否是proto-gen-go自动生成的特殊字段
@@ -13,3 +14,7 @@ protobuf相关操作包
 > 无法获取对应的Go字段名(只能获取到protobuf定义名与json定义名。。。)
 > 
 > 因此GetFields直接使用golang原生的反射实现了类似`GetProperties`的功能，但性能方面，比`GetProperties`慢大约50%。
+
+## protobuffer
+将老版本的"github.com/golang/protobuf"替换为新版本的"google.golang.org/protobuf"时，原来的`proto.Buffer`被移除，这里提供了`protobuffer.Buffer`用于替代原来的`proto.Buffer`。
+
