@@ -6,11 +6,12 @@ import (
 	"reflect"
 	"strings"
 
-	protogh "github.com/golang/protobuf/proto"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/protoadapt"
 )
 
 // 自动生成字段名常量定义
+//
 //goland:noinspection GoSnakeCaseUsage,GoUnusedConst
 const (
 	// protoc-gen-go v1.20之前生成的"XXX_"前缀字段
@@ -69,9 +70,10 @@ func (fd *FieldInfo) String() string {
 }
 
 // GetFields 获取目标proto消息的字段信息
-//  @param msg protobuf消息
-//  @return []*FieldInfo 字段信息列表
-//  @return error
+//
+//	@param msg protobuf消息
+//	@return []*FieldInfo 字段信息列表
+//	@return error
 func GetFields(msg proto.Message) ([]*FieldInfo, error) {
 	// 对msg进行反射获取reflect.Value
 	vMsg := reflect.ValueOf(msg)
@@ -142,11 +144,12 @@ func GetFields(msg proto.Message) ([]*FieldInfo, error) {
 }
 
 // GetFieldsByProperties 根据StructProperties获取proto消息字段信息
-//  注意，该函数使用了`github.com/golang/protobuf/proto`的弃用函数`GetProperties`
-//  @param msg protobuf消息
-//  @return []*FieldInfo 字段信息列表
-//  @return error
-func GetFieldsByProperties(msg protogh.Message) ([]*FieldInfo, error) {
+//
+//	注意，该函数使用了`github.com/golang/protobuf/proto`的弃用函数`GetProperties`
+//	@param msg protobuf消息
+//	@return []*FieldInfo 字段信息列表
+//	@return error
+func GetFieldsByProperties(msg protoadapt.MessageV1) ([]*FieldInfo, error) {
 	// 对msg进行反射获取reflect.Value
 	vMsg := reflect.ValueOf(msg)
 	// 判断reflect.Value的类型，这里必须是指针
@@ -174,8 +177,7 @@ func GetFieldsByProperties(msg protogh.Message) ([]*FieldInfo, error) {
 
 	fieldInfos := make([]*FieldInfo, 0, fdNum)
 
-	//goland:noinspection GoDeprecation
-	protoProps := protogh.GetProperties(mElem)
+	protoProps := GetProperties(mElem)
 	for _, prop := range protoProps.Prop {
 		if strings.HasPrefix(prop.Name, "XXX_") {
 			continue
@@ -200,9 +202,10 @@ func GetFieldsByProperties(msg protogh.Message) ([]*FieldInfo, error) {
 }
 
 // IsGeneratedAutoFields 判断字段是否是proto-gen-go自动生成的特殊字段
-//  @param fieldName 字段名
-//  @return bool 是否是proto-gen-go自动生成的特殊字段
-//  @return error
+//
+//	@param fieldName 字段名
+//	@return bool 是否是proto-gen-go自动生成的特殊字段
+//	@return error
 func IsGeneratedAutoFields(fieldName string) (bool, error) {
 	if fieldName == "" {
 		return false, errors.New("fieldName is empty")

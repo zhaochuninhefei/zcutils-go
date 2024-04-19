@@ -2,11 +2,11 @@ package protoreflect
 
 import (
 	"fmt"
+	"google.golang.org/protobuf/protoadapt"
 	"testing"
 
 	"gitee.com/zhaochuninhefei/zcutils-go/protobuf/myproto-go/asset"
 	"gitee.com/zhaochuninhefei/zcutils-go/protobuf/myproto-go/owner"
-	protogh "github.com/golang/protobuf/proto"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -22,7 +22,7 @@ func BenchmarkGetFieldsByProperties(b *testing.B) {
 		AssetNum:    &asset.BasicAsset_AssetNumInt{AssetNumInt: 123},
 		AssetStatus: asset.BasicAsset_CHANGED,
 	}
-	pb := protogh.Message(asset1)
+	pb := protoadapt.MessageV1(asset1)
 	for i := 0; i < b.N; i++ {
 		_, err := GetFieldsByProperties(pb)
 		if err != nil {
@@ -116,7 +116,7 @@ func TestGetFieldsByProperties(t *testing.T) {
 		AssetNum:    &asset.BasicAsset_AssetNumInt{AssetNumInt: 123},
 		AssetStatus: asset.BasicAsset_CHANGED,
 	}
-	pb := protogh.Message(asset1)
+	pb := protoadapt.MessageV1(asset1)
 
 	got, err := GetFieldsByProperties(pb)
 	if err != nil {
