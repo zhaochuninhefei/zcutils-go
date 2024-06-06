@@ -58,6 +58,17 @@ echo
 read -rp "zccompress 测试用例 结束，按下任意按键继续..." -n 1
 echo
 
+# zcnumber
+echo "zcnumber 测试用例"
+cd zcnumber
+go test
+cd ../
+
+# 等待控制台输入任意字符继续
+echo
+read -rp "zcnumber 测试用例 结束，按下任意按键继续..." -n 1
+echo
+
 # zcpath
 echo "zcpath 测试用例"
 cd zcpath
