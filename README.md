@@ -17,6 +17,12 @@ golang常用工具类库
 - BitSet32 32位的位图
 - BitSet64 64位的位图
 
+# zccompress
+提供目录的tar.gz压缩与解压函数。
+
+# zcnumber
+提供JSON转换时同时支持数字与字符串的自定义类型。
+
 # zcpath
 文件路径相关操作包
 
@@ -25,6 +31,9 @@ golang常用工具类库
 
 # zcslice
 切片相关操作包
+
+# zcssh
+ssh远程操作函数包
 
 # zcstr
 字符串相关操作包
@@ -45,6 +54,9 @@ golang常用工具类库
 
 # zcutil
 其他通用处理函数
+
+# zcwaiter
+同步等待器
 
 # JetBrains support
 Thanks to JetBrains for supporting open source projects.
